@@ -613,6 +613,14 @@ reboot_now("%(bcb_dev)s", "recovery");
 else if get_stage("%(bcb_dev)s") == "3/3" then
 """ % bcb_dev)
 
+  script.Print("      _____  ___________")
+  script.Print("  __ / / _ \/ ___/_  __/__ ___ ___ _  ")
+  script.Print(" / // / // / /__  / / / -_) _ `/  ' \ ")
+  script.Print(" \___/____/\___/ /_/  \__/\_,_/_/_/_/ ")
+  script.Print(" ")
+  script.Print("Optimized CyanogenMod 13")
+  script.Print(" ")
+  script.AppendExtra("sleep (2);")
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
