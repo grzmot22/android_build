@@ -197,11 +197,9 @@ class Transfer(object):
 # original image.
 
 class BlockImageDiff(object):
-<<<<<<< HEAD
-  def __init__(self, tgt, src=None, threads=None, version=2):
-=======
+
   def __init__(self, tgt, src=None, threads=None, version=3, use_lzma=False):
->>>>>>> bcfca4758b5e88a3e513731c562d60f9c911910f
+
     if threads is None:
       threads = multiprocessing.cpu_count() // 2
       if threads == 0: threads = 1
