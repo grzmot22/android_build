@@ -19,7 +19,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 # GCC
+=======
+#######################
+### GENERAL SECTION ###
+#######################
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 
 # General optimization level of target ARM compiled with GCC. Default: -O2
 ARCHIDROID_GCC_CFLAGS_ARM := -O3
@@ -34,6 +40,7 @@ ARCHIDROID_GCC_CFLAGS := -O3 -fgcse-las -fgcse-sm -fipa-pta -fivopts -fomit-fram
 ### EXPERIMENTAL SECTION ###
 ############################
 
+<<<<<<< HEAD
 # The following flags were tested, and found to be causing compilation issues / other problems
 
 # ARCHIDROID_GCC_CFLAGS += -fmodulo-sched -fmodulo-sched-allow-regmoves
@@ -59,18 +66,49 @@ ARCHIDROID_GCC_CFLAGS := -O3 -fgcse-las -fgcse-sm -fipa-pta -fivopts -fomit-fram
 ############################
 
 # Flags passed to all C++ targets compiled with GCC
+=======
+# Flags in this section are highly experimental
+# Current setup is based on proposed androideabi toolchain
+# Results with other toolchains may vary
+
+# These flags work fine in suggested compiler, but may cause ICEs in other compilers, comment if needed
+ARCHIDROID_GCC_CFLAGS += -fgraphite -fgraphite-identity
+
+# The following flags (-floop) require that your GCC has been configured with --with-isl
+# Additionally, applying any of them will most likely cause ICE in your compiler, so they're disabled
+# ARCHIDROID_GCC_CFLAGS += -floop-block -floop-interchange -floop-nest-optimize -floop-parallelize-all -floop-strip-mine
+
+# These flags have been disabled because of assembler errors
+# ARCHIDROID_GCC_CFLAGS += -fmodulo-sched -fmodulo-sched-allow-regmoves
+
+####################
+### MISC SECTION ###
+####################
+
+# Flags passed to GCC preprocessor for C and C++
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 ARCHIDROID_GCC_CPPFLAGS := $(ARCHIDROID_GCC_CFLAGS)
 
 # Flags passed to linker (ld) of all C and C++ targets compiled with GCC
 ARCHIDROID_GCC_LDFLAGS := -Wl,--sort-common
 
+<<<<<<< HEAD
 
 # CLANG
+=======
+#####################
+### CLANG SECTION ###
+#####################
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 
 # Flags passed to all C targets compiled with CLANG
 ARCHIDROID_CLANG_CFLAGS := -O3 -Qunused-arguments -Wno-unknown-warning-option
 
+<<<<<<< HEAD
 # Flags passed to all C++ targets compiled with CLANG
+=======
+# Flags passed to CLANG preprocessor for C and C++
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 ARCHIDROID_CLANG_CPPFLAGS := $(ARCHIDROID_CLANG_CFLAGS)
 
 # Flags passed to linker (ld) of all C and C++ targets compiled with CLANG
@@ -105,8 +143,14 @@ ARCHIDROID_CLANG_UNKNOWN_FLAGS := \
   -funsafe-loop-optimizations \
   -fweb
 
+<<<<<<< HEAD
 
 # General
+=======
+#####################
+### HACKS SECTION ###
+#####################
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 
 # Most of the flags are increasing code size of the output binaries, especially O3 instead of Os for target THUMB
 # This may become problematic for small blocks, especially for boot or recovery blocks (ramdisks)

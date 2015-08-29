@@ -26,6 +26,9 @@ combo_os_arch := $($(combo_target)OS)-$($(combo_target)$(combo_2nd_arch_prefix)A
 
 combo_var_prefix := $(combo_2nd_arch_prefix)$(combo_target)
 
+# ArchiDroid
+include $(BUILD_SYSTEM)/archidroid.mk
+
 # Set reasonable defaults for the various variables
 
 $(combo_var_prefix)CC := $(CC)
@@ -50,7 +53,11 @@ $(combo_var_prefix)HAVE_STRLCAT := 0
 $(combo_var_prefix)HAVE_KERNEL_MODULES := 0
 
 $(combo_var_prefix)GLOBAL_CFLAGS := -fno-exceptions -Wno-multichar
+<<<<<<< HEAD
 $(combo_var_prefix)RELEASE_CFLAGS := -O3 -fno-strict-aliasing
+=======
+$(combo_var_prefix)RELEASE_CFLAGS := $(ARCHIDROID_GCC_CFLAGS_ARM) -fno-strict-aliasing
+>>>>>>> 7866773f53df6dfe7174b887aa43695ed2bb9d09
 $(combo_var_prefix)GLOBAL_CPPFLAGS :=
 $(combo_var_prefix)GLOBAL_LDFLAGS :=
 $(combo_var_prefix)GLOBAL_ARFLAGS := crsPD
