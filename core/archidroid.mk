@@ -19,7 +19,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GCC
+#######################
+### GENERAL SECTION ###
+#######################
 
 # General optimization level of target ARM compiled with GCC. Default: -O2
 ARCHIDROID_GCC_CFLAGS_ARM := -O3
@@ -34,43 +36,38 @@ ARCHIDROID_GCC_CFLAGS := -O3 -fgcse-las -fgcse-sm -fipa-pta -fivopts -fomit-fram
 ### EXPERIMENTAL SECTION ###
 ############################
 
-# The following flags were tested, and found to be causing compilation issues / other problems
+# Flags in this section are highly experimental
+# Current setup is based on proposed androideabi toolchain
+# Results with other toolchains may vary
 
+# These flags work fine in suggested compiler, but may cause ICEs in other compilers, comment if needed
+ARCHIDROID_GCC_CFLAGS += -fgraphite -fgraphite-identity
+
+# The following flags (-floop) require that your GCC has been configured with --with-isl
+# Additionally, applying any of them will most likely cause ICE in your compiler, so they're disabled
+# ARCHIDROID_GCC_CFLAGS += -floop-block -floop-interchange -floop-nest-optimize -floop-parallelize-all -floop-strip-mine
+
+# These flags have been disabled because of assembler errors
 # ARCHIDROID_GCC_CFLAGS += -fmodulo-sched -fmodulo-sched-allow-regmoves
-# Disabled because of:
-# {standard input}: Assembler messages:
-# {standard input}:571: Error: symbol `.LPIC38' is already defined
-# external/chromium_org/third_party/zlib/crc32.c
 
-# If your arm-linux-androideabi includes support for graphite optimization flags (CLooG), enable additional flags
+####################
+### MISC SECTION ###
+####################
 
-# ARCHIDROID_GCC_CFLAGS += -fgraphite
-# Disabled because of internal compiler error:
-# 0x5ceefc gsi_for_stmt(gimple_statement_d*)
-# 0xa8788e insert_out_of_ssa_copy
-# 0xa87ede rewrite_phi_out_of_ssa
-# 0xa8e233 rewrite_reductions_out_of_ssa
-# 0xa8e233 build_poly_scop(scop*)
-# 0xa79686 graphite_transform_loops()
-# 0x7dca56 graphite_transforms
-
-############################
-### EXPERIMENTAL SECTION ###
-############################
-
-# Flags passed to all C++ targets compiled with GCC
+# Flags passed to GCC preprocessor for C and C++
 ARCHIDROID_GCC_CPPFLAGS := $(ARCHIDROID_GCC_CFLAGS)
 
 # Flags passed to linker (ld) of all C and C++ targets compiled with GCC
 ARCHIDROID_GCC_LDFLAGS := -Wl,--sort-common
 
-
-# CLANG
+#####################
+### CLANG SECTION ###
+#####################
 
 # Flags passed to all C targets compiled with CLANG
 ARCHIDROID_CLANG_CFLAGS := -O3 -Qunused-arguments -Wno-unknown-warning-option
 
-# Flags passed to all C++ targets compiled with CLANG
+# Flags passed to CLANG preprocessor for C and C++
 ARCHIDROID_CLANG_CPPFLAGS := $(ARCHIDROID_CLANG_CFLAGS)
 
 # Flags passed to linker (ld) of all C and C++ targets compiled with CLANG
@@ -105,8 +102,9 @@ ARCHIDROID_CLANG_UNKNOWN_FLAGS := \
   -funsafe-loop-optimizations \
   -fweb
 
-
-# General
+#####################
+### HACKS SECTION ###
+#####################
 
 # Most of the flags are increasing code size of the output binaries, especially O3 instead of Os for target THUMB
 # This may become problematic for small blocks, especially for boot or recovery blocks (ramdisks)
