@@ -53,9 +53,13 @@ $(combo_var_prefix)HAVE_STRLCAT := 0
 $(combo_var_prefix)HAVE_KERNEL_MODULES := 0
 
 $(combo_var_prefix)GLOBAL_CFLAGS := -fno-exceptions -Wno-multichar
+<<<<<<< HEAD
 $(combo_var_prefix)RELEASE_CFLAGS := $(ARCHIDROID_GCC_CFLAGS_ARM) -fno-strict-aliasing
+=======
+$(combo_var_prefix)RELEASE_CFLAGS := -O3 -fno-strict-aliasing
+>>>>>>> 3b92a663093a0c0ed0d66ffc607d56c6d490e80c
 $(combo_var_prefix)GLOBAL_CPPFLAGS :=
-$(combo_var_prefix)GLOBAL_LDFLAGS :=
+$(combo_var_prefix)GLOBAL_LDFLAGS := -Wl,-O1 -Wl,--as-needed -Wl,--relax -Wl,--sort-common -Wl,--gc-sections
 $(combo_var_prefix)GLOBAL_ARFLAGS := crsPD
 $(combo_var_prefix)GLOBAL_LD_DIRS :=
 
