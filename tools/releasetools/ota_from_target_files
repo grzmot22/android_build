@@ -558,7 +558,6 @@ def WriteFullOTAPackage(input_zip, output_zip):
   #       wipe and install system, boot image, etc.
   #       set up system to update recovery partition on first boot
   #    complete script normally (allow recovery to mark itself finished and reboot)
-if OPTIONS.recovery:
 
   recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
                                          OPTIONS.input_tmp, "RECOVERY")
