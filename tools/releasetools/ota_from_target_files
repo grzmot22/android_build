@@ -143,11 +143,8 @@ OPTIONS.fallback_to_full = True
 OPTIONS.backuptool = False
 OPTIONS.override_device = 'auto'
 OPTIONS.override_prop = False
-<<<<<<< HEAD
-=======
 OPTIONS.recovery = False
 OPTIONS.use_lzma = False
->>>>>>> 3b92a663093a0c0ed0d66ffc607d56c6d490e80c
 
 def MostPopularKey(d, default):
   """Given a dict, return the key corresponding to the largest
@@ -562,7 +559,6 @@ def WriteFullOTAPackage(input_zip, output_zip):
   #       set up system to update recovery partition on first boot
   #    complete script normally (allow recovery to mark itself finished and reboot)
 
-<<<<<<< HEAD
   recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
                                          OPTIONS.input_tmp, "RECOVERY")
   if OPTIONS.two_step:
@@ -598,31 +594,6 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   # script.Print("Lead Developer: AntaresOne")
   script.Print("")
   script.AppendExtra("sleep (2);")
-=======
-
-  if OPTIONS.recovery:
-
-    recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
-                                        OPTIONS.input_tmp, "RECOVERY")
-    if OPTIONS.two_step:
-      if not OPTIONS.info_dict.get("multistage_support", None):
-        assert False, "two-step packages not supported by this build"
-      fs = OPTIONS.info_dict["fstab"]["/misc"]
-      assert fs.fs_type.upper() == "EMMC", \
-          "two-step packages only supported on devices with EMMC /misc partitions"
-      bcb_dev = {"bcb_dev": fs.device}
-      common.ZipWriteStr(output_zip, "recovery.img", recovery_img.data)
-      script.AppendExtra("""
-  if get_stage("%(bcb_dev)s") == "2/3" then
-  """ % bcb_dev)
-      script.WriteRawImage("/recovery", "recovery.img")
-      script.AppendExtra("""
-  set_stage("%(bcb_dev)s", "3/3");
-  reboot_now("%(bcb_dev)s", "recovery");
-  else if get_stage("%(bcb_dev)s") == "3/3" then
-  """ % bcb_dev)
-
->>>>>>> 3b92a663093a0c0ed0d66ffc607d56c6d490e80c
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
@@ -661,18 +632,12 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     system_diff = common.BlockDifference("system", system_tgt, src=None)
     system_diff.WriteScript(script, output_zip)
   else:
-<<<<<<< HEAD
     script.Print("Formatting /system...");
     script.AppendExtra("run_program(\"/tmp/install/bin/format.sh\");")
     script.Print("Mounting /system...");
     script.Mount("/system")
     script.Print("Installing...");
     if not has_recovery_patch:
-=======
-    script.FormatPartition("/system")
-    script.Mount("/system")
-    if OPTIONS.recovery and not has_recovery_patch:
->>>>>>> 3b92a663093a0c0ed0d66ffc607d56c6d490e80c
       script.UnpackPackageDir("recovery", "/system")
     script.UnpackPackageDir("system", "/system")
     script.Print("Making symlinks...");
@@ -1659,13 +1624,9 @@ def main(argv):
                                               "stash_threshold=",
                                               "backup=",
                                               "override_device=",
-<<<<<<< HEAD
-                                              "override_prop="],
-=======
                                               "override_prop=",
                                               "recovery",
                                               "use_lzma"],
->>>>>>> 3b92a663093a0c0ed0d66ffc607d56c6d490e80c
                              extra_option_handler=option_handler)
 
   if len(args) != 2:
