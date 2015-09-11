@@ -159,7 +159,11 @@ $(combo_2nd_arch_prefix)TARGET_RELEASE_CFLAGS := \
 			-Wstrict-aliasing=2 \
 			-fgcse-after-reload \
 			-frerun-cse-after-loop \
-			-frename-registers
+			-frename-registers \
+			-Wunused-parameter \
+			-Wsign-compare \
+			-Wold-style-declaration \
+			-Wmissing-field-initializers
 
 libc_root := bionic/libc
 libm_root := bionic/libm
