@@ -126,7 +126,7 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8 4.8.% 4.9 4.9.%, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin \
 			-fno-strict-volatile-bitfields
-
+endif
 # More flags/options can be added here
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 			-DNDEBUG \
@@ -292,3 +292,4 @@ $(hide) $(PRIVATE_CXX) -nostdlib -Bstatic \
 	-Wl,--end-group \
 	$(if $(filter true,$(PRIVATE_NO_CRT)),,$(PRIVATE_TARGET_CRTEND_O))
 endef
+endif
