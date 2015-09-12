@@ -92,11 +92,7 @@ def fetch_query_via_ssh(remote_url, query):
             reviews.append(review)
         except:
             pass
-<<<<<<< HEAD
     args.quiet or print('Found {0} reviews'.format(len(reviews)))
-=======
-    print('Found {0} reviews'.format(len(reviews)))
->>>>>>> 5dea25f2a5a7eb487d1e79d7cd564a8ef1e2b90d
     return reviews
 
 
