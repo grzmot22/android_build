@@ -92,7 +92,11 @@ def fetch_query_via_ssh(remote_url, query):
             reviews.append(review)
         except:
             pass
+<<<<<<< HEAD
     args.quiet or print('Found {0} reviews'.format(len(reviews)))
+=======
+    print('Found {0} reviews'.format(len(reviews)))
+>>>>>>> 5dea25f2a5a7eb487d1e79d7cd564a8ef1e2b90d
     return reviews
 
 
@@ -121,7 +125,6 @@ def fetch_query(remote_url, query):
 if __name__ == '__main__':
     # Default to CyanogenMod Gerrit
     default_gerrit = 'http://review.cyanogenmod.org'
-
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=textwrap.dedent('''\
         repopick.py is a utility to simplify the process of cherry picking
         patches from CyanogenMod's Gerrit instance (or any gerrit instance of your choosing)
@@ -151,6 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('-Q', '--query', help='pick all commits using the specified query')
     parser.add_argument('-g', '--gerrit', default=default_gerrit, help='Gerrit Instance to use. Form proto://[user@]host[:port]')
     args = parser.parse_args()
+        print (args.gerrit)
     if not args.start_branch and args.abandon_first:
         parser.error('if --abandon-first is set, you must also give the branch name with --start-branch')
     if args.auto_branch:
@@ -340,7 +344,6 @@ if __name__ == '__main__':
                     print('Fetching from GitHub didn\'t work, trying to fetch the change from Gerrit')
                 else:
                     print('Fetching from {0}'.format(args.gerrit))
-
             if args.pull:
                 cmd = ['git pull --no-edit', item['fetch'][method]['url'], item['fetch'][method]['ref']]
             else:
