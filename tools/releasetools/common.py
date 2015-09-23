@@ -1104,9 +1104,7 @@ def ComputeDifferences(diffs):
 
 
 class BlockDifference:
-  
   def __init__(self, partition, tgt, src=None, check_first_block=False, version=None, use_lzma=False):
-
     self.tgt = tgt
     self.src = src
     self.partition = partition
@@ -1121,9 +1119,7 @@ class BlockDifference:
     self.version = version
 
     b = blockimgdiff.BlockImageDiff(tgt, src, threads=OPTIONS.worker_threads,
-
                                     version=self.version, use_lzma=use_lzma)
-
     tmpdir = tempfile.mkdtemp()
     OPTIONS.tempfiles.append(tmpdir)
     self.path = os.path.join(tmpdir, partition)
