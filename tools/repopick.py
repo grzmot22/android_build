@@ -122,6 +122,7 @@ def fetch_query(remote_url, query):
 if __name__ == '__main__':
     # Default to CyanogenMod Gerrit
     default_gerrit = 'http://review.cyanogenmod.org'
+
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=textwrap.dedent('''\
         repopick.py is a utility to simplify the process of cherry picking
         patches from CyanogenMod's Gerrit instance (or any gerrit instance of your choosing)
@@ -151,7 +152,6 @@ if __name__ == '__main__':
     parser.add_argument('-Q', '--query', help='pick all commits using the specified query')
     parser.add_argument('-g', '--gerrit', default=default_gerrit, help='Gerrit Instance to use. Form proto://[user@]host[:port]')
     args = parser.parse_args()
-        print (args.gerrit)
     if not args.start_branch and args.abandon_first:
         parser.error('if --abandon-first is set, you must also give the branch name with --start-branch')
     if args.auto_branch:
@@ -207,6 +207,7 @@ if __name__ == '__main__':
     projects = xml_root.findall('project')
     default_revision = xml_root.findall('default')[0].get('revision').split('/')[-1]
 
+
     #dump project data into the a list of dicts with the following data:
     #{project: {path, revision}}
 
@@ -216,7 +217,6 @@ if __name__ == '__main__':
         revision = project.get('revision')
         if revision is None:
             revision = default_revision
-
         if not name in project_name_to_data:
             project_name_to_data[name] = {}
         project_name_to_data[name][revision] = path
