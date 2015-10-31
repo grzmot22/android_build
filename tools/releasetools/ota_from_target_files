@@ -843,6 +843,7 @@ def WriteBlockIncrementalOTAPackage(target_zip, source_zip, output_zip):
         OPTIONS.info_dict.get("blockimgdiff_versions", "1").split(","))
 
   system_diff = common.BlockDifference("system", system_tgt, system_src,
+
                                        check_first_block=True,
                                        version=blockimgdiff_version,
                                        use_lzma=OPTIONS.use_lzma)
@@ -853,6 +854,7 @@ def WriteBlockIncrementalOTAPackage(target_zip, source_zip, output_zip):
     vendor_src = GetImage("vendor", OPTIONS.source_tmp, OPTIONS.source_info_dict)
     vendor_tgt = GetImage("vendor", OPTIONS.target_tmp, OPTIONS.target_info_dict)
     vendor_diff = common.BlockDifference("vendor", vendor_tgt, vendor_src,
+
                                          check_first_block=True,
                                          version=blockimgdiff_version,
                                          use_lzma=OPTIONS.use_lzma)
