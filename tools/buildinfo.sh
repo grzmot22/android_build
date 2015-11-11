@@ -7,6 +7,7 @@ echo "ro.build.id=$BUILD_ID"
 echo "ro.build.display.id=$BUILD_DISPLAY_ID"
 echo "ro.build.version.incremental=$BUILD_NUMBER"
 echo "ro.build.version.sdk=$PLATFORM_SDK_VERSION"
+echo "ro.build.version.preview_sdk=$PLATFORM_PREVIEW_SDK_VERSION"
 echo "ro.build.version.codename=$PLATFORM_VERSION_CODENAME"
 echo "ro.build.version.all_codenames=$PLATFORM_VERSION_ALL_CODENAMES"
 echo "ro.build.version.release=$PLATFORM_VERSION"
@@ -36,11 +37,8 @@ echo "ro.product.cpu.abilist32=$TARGET_CPU_ABI_LIST_32_BIT"
 echo "ro.product.cpu.abilist64=$TARGET_CPU_ABI_LIST_64_BIT"
 
 echo "ro.product.manufacturer=$PRODUCT_MANUFACTURER"
-if [ -n "$PRODUCT_DEFAULT_LANGUAGE" ] ; then
-  echo "ro.product.locale.language=$PRODUCT_DEFAULT_LANGUAGE"
-fi
-if [ -n "$PRODUCT_DEFAULT_REGION" ] ; then
-  echo "ro.product.locale.region=$PRODUCT_DEFAULT_REGION"
+if [ -n "$PRODUCT_DEFAULT_LOCALE" ] ; then
+  echo "ro.product.locale=$PRODUCT_DEFAULT_LOCALE"
 fi
 echo "ro.wifi.channels=$PRODUCT_DEFAULT_WIFI_CHANNELS"
 echo "ro.board.platform=$TARGET_BOARD_PLATFORM"

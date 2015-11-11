@@ -27,6 +27,7 @@ PRODUCT_PACKAGES := \
 	Fallback \
 	Gallery \
 	GestureBuilder \
+	Launcher3 \
 	LegacyCamera \
 	librs_jni \
 	libwnndict \
@@ -59,7 +60,14 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGE_OVERLAYS := development/sdk_overlay
 
 PRODUCT_COPY_FILES := \
+<<<<<<< HEAD
 	frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+=======
+	device/generic/goldfish/data/etc/apns-conf.xml:system/etc/apns-conf.xml \
+	frameworks/base/data/sounds/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
+	frameworks/base/data/sounds/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
+	device/generic/goldfish/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	device/generic/goldfish/camera/media_profiles.xml:system/etc/media_profiles.xml \
 	frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:system/etc/media_codecs_google_audio.xml \
 	frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:system/etc/media_codecs_google_telephony.xml \
@@ -80,6 +88,7 @@ $(call inherit-product-if-exists, external/google-fonts/coming-soon/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/cutive-mono/fonts.mk)
 $(call inherit-product-if-exists, external/noto-fonts/fonts.mk)
 $(call inherit-product-if-exists, external/naver-fonts/fonts.mk)
+$(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
 $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
 $(call inherit-product-if-exists, frameworks/webview/chromium/chromium.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core.mk)

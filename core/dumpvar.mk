@@ -84,10 +84,15 @@ $(info   HOST_OS_EXTRA=$(HOST_OS_EXTRA))
 $(info   HOST_BUILD_TYPE=$(HOST_BUILD_TYPE))
 $(info   BUILD_ID=$(BUILD_ID))
 $(info   OUT_DIR=$(OUT_DIR))
+<<<<<<< HEAD
 ifneq (,$(filter true, $(CYNGN_TARGET) $(EXTERNAL_CLEAN_TARGET)))
 ifeq ($(CYNGN_TARGET), true)
 $(info   CYNGN_TARGET=$(CYNGN_TARGET))
 endif
+=======
+ifeq ($(CYNGN_TARGET),true)
+$(info   CYNGN_TARGET=$(CYNGN_TARGET))
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 $(info   CYNGN_FEATURES=$(CYNGN_FEATURES))
 endif
 $(info ============================================)

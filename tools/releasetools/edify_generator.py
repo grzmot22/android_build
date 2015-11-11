@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import re
 
 import common
@@ -21,11 +20,15 @@ class EdifyGenerator(object):
   """Class to generate scripts in the 'edify' recovery script language
   used from donut onwards."""
 
-  def __init__(self, version, info):
+  def __init__(self, version, info, fstab=None):
     self.script = []
     self.mounts = set()
     self.version = version
     self.info = info
+    if fstab is None:
+      self.fstab = self.info.get("fstab", None)
+    else:
+      self.fstab = fstab
 
   def MakeTemporary(self):
     """Make a temporary script object whose commands can latter be
@@ -36,7 +39,7 @@ class EdifyGenerator(object):
     return x
 
   @staticmethod
-  def _WordWrap(cmd, linelen=80):
+  def WordWrap(cmd, linelen=80):
     """'cmd' should be a function call with null characters after each
     parameter (eg, "somefun(foo,\0bar,\0baz)").  This function wraps cmd
     to a given line length, replacing nulls with spaces and/or newlines
@@ -74,35 +77,33 @@ class EdifyGenerator(object):
       raise ValueError("must specify an OEM property")
     if not value:
       raise ValueError("must specify the OEM value")
-    cmd = ('file_getprop("/oem/oem.prop", "%s") == "%s" || '
-           'abort("This package expects the value \\"%s\\"  for '
-           '\\"%s\\" on the OEM partition; '
-           'this has value \\"" + file_getprop("/oem/oem.prop") + "\\".");'
-           ) % (name, value, name, value)
+    cmd = ('file_getprop("/oem/oem.prop", "{name}") == "{value}" || '
+           'abort("This package expects the value \\"{value}\\" for '
+           '\\"{name}\\" on the OEM partition; this has value \\"" + '
+           'file_getprop("/oem/oem.prop", "{name}") + "\\".");').format(
+               name=name, value=value)
     self.script.append(cmd)
 
   def AssertSomeFingerprint(self, *fp):
     """Assert that the current recovery build fingerprint is one of *fp."""
     if not fp:
       raise ValueError("must specify some fingerprints")
-    cmd = (
-           ' ||\n    '.join([('getprop("ro.build.fingerprint") == "%s"')
-                        % i for i in fp]) +
+    cmd = (' ||\n    '.join([('getprop("ro.build.fingerprint") == "%s"') % i
+                             for i in fp]) +
            ' ||\n    abort("Package expects build fingerprint of %s; this '
-           'device has " + getprop("ro.build.fingerprint") + ".");'
-           ) % (" or ".join(fp),)
+           'device has " + getprop("ro.build.fingerprint") + ".");') % (
+               " or ".join(fp))
     self.script.append(cmd)
 
   def AssertSomeThumbprint(self, *fp):
     """Assert that the current recovery build thumbprint is one of *fp."""
     if not fp:
       raise ValueError("must specify some thumbprints")
-    cmd = (
-           ' ||\n    '.join([('getprop("ro.build.thumbprint") == "%s"')
-                        % i for i in fp]) +
+    cmd = (' ||\n    '.join([('getprop("ro.build.thumbprint") == "%s"') % i
+                             for i in fp]) +
            ' ||\n    abort("Package expects build thumbprint of %s; this '
-           'device has " + getprop("ro.build.thumbprint") + ".");'
-           ) % (" or ".join(fp),)
+           'device has " + getprop("ro.build.thumbprint") + ".");') % (
+               " or ".join(fp))
     self.script.append(cmd)
 
   def AssertOlderBuild(self, timestamp, timestamp_text):
@@ -111,8 +112,8 @@ class EdifyGenerator(object):
     self.script.append(
         ('(!less_than_int(%s, getprop("ro.build.date.utc"))) || '
          'abort("Can\'t install this package (%s) over newer '
-         'build (" + getprop("ro.build.date") + ").");'
-         ) % (timestamp, timestamp_text))
+         'build (" + getprop("ro.build.date") + ").");') % (timestamp,
+                                                            timestamp_text))
 
   def AssertDevice(self, device):
     """Assert that the device identifier is the given string."""
@@ -132,6 +133,7 @@ class EdifyGenerator(object):
            ' || abort("This package supports bootloader(s): ' +
            ", ".join(["%s" % (b,) for b in bootloaders]) +
            '; this device has bootloader " + getprop("ro.bootloader") + ".");' +
+<<<<<<< HEAD
            ");")
     self.script.append(self._WordWrap(cmd))
 
@@ -146,6 +148,22 @@ class EdifyGenerator(object):
            ");")
     self.script.append(self._WordWrap(cmd))
 
+=======
+           ");")
+    self.script.append(self.WordWrap(cmd))
+
+  def AssertSomeBaseband(self, *basebands):
+    """Assert that the baseband version is one of *basebands."""
+    cmd = ("assert(" +
+           " || ".join(['getprop("ro.baseband") == "%s"' % (b,)
+                         for b in basebands]) +
+           ' || abort("This package supports baseband(s): ' +
+           ", ".join(["%s" % (b,) for b in basebands]) +
+           '; this device has baseband " + getprop("ro.baseband") + ".");' +
+           ");")
+    self.script.append(self._WordWrap(cmd))
+
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
   def RunBackup(self, command):
     self.script.append(('run_program("/tmp/install/bin/backuptool.sh", "%s");' % command))
 
@@ -231,22 +249,21 @@ class EdifyGenerator(object):
     self.script.append('ui_print("%s");' % (message,))
 
   def TunePartition(self, partition, *options):
-    fstab = self.info.get("fstab", None)
+    fstab = self.fstab
     if fstab:
       p = fstab[partition]
-      if (p.fs_type not in ( "ext2", "ext3", "ext4")):
+      if p.fs_type not in ("ext2", "ext3", "ext4"):
         raise ValueError("Partition %s cannot be tuned\n" % (partition,))
-    self.script.append('tune2fs(' +
-                       "".join(['"%s", ' % (i,) for i in options]) +
-                       '"%s") || abort("Failed to tune partition %s");'
-                       % ( p.device,partition));
+    self.script.append(
+        'tune2fs(' + "".join(['"%s", ' % (i,) for i in options]) +
+        '"%s") || abort("Failed to tune partition %s");' % (
+            p.device, partition))
 
   def FormatPartition(self, partition):
     """Format the given partition, specified by its mount point (eg,
     "/system")."""
 
-    reserve_size = 0
-    fstab = self.info.get("fstab", None)
+    fstab = self.fstab
     if fstab:
       p = fstab[partition]
       self.script.append('format("%s", "%s", "%s", "%s", "%s");' %
@@ -256,7 +273,7 @@ class EdifyGenerator(object):
   def WipeBlockDevice(self, partition):
     if partition not in ("/system", "/vendor"):
       raise ValueError(("WipeBlockDevice doesn't work on %s\n") % (partition,))
-    fstab = self.info.get("fstab", None)
+    fstab = self.fstab
     size = self.info.get(partition.lstrip("/") + "_size", None)
     device = fstab[partition].device
 
@@ -264,9 +281,19 @@ class EdifyGenerator(object):
 
   def DeleteFiles(self, file_list):
     """Delete all files in file_list."""
-    if not file_list: return
+    if not file_list:
+      return
     cmd = "delete(" + ",\0".join(['"%s"' % (i,) for i in file_list]) + ");"
-    self.script.append(self._WordWrap(cmd))
+    self.script.append(self.WordWrap(cmd))
+
+  def DeleteFilesIfNotMatching(self, file_list):
+    """Delete the file in file_list if not matching the checksum."""
+    if not file_list:
+      return
+    for name, sha1 in file_list:
+      cmd = ('sha1_check(read_file("{name}"), "{sha1}") || '
+             'delete("{name}");'.format(name=name, sha1=sha1))
+      self.script.append(self.WordWrap(cmd))
 
   def DeleteFilesIfNotMatching(self, file_list):
     """Delete the file in file_list if not matching the checksum."""
@@ -289,7 +316,11 @@ class EdifyGenerator(object):
        skip the action if the file exists.  Used when a patch
        is later renamed."""
     cmd = ('sha1_check(read_file("%s"), %s) ||' % (tgtfile, tgtsha1))
+<<<<<<< HEAD
     self.script.append(self._WordWrap(cmd))
+=======
+    self.script.append(self.WordWrap(cmd))
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
   def ApplyPatch(self, srcfile, tgtfile, tgtsize, tgtsha1, *patchpairs):
     """Apply binary patches (in *patchpairs) to the given srcfile to
@@ -303,13 +334,13 @@ class EdifyGenerator(object):
       cmd.append(',\0%s, package_extract_file("%s")' % patchpairs[i:i+2])
     cmd.append(');')
     cmd = "".join(cmd)
-    self.script.append(self._WordWrap(cmd))
+    self.script.append(self.WordWrap(cmd))
 
   def WriteRawImage(self, mount_point, fn, mapfn=None):
     """Write the given package file into the partition for the given
     mount point."""
 
-    fstab = self.info["fstab"]
+    fstab = self.fstab
     if fstab:
       p = fstab[mount_point]
       partition_type = common.PARTITION_TYPES[p.fs_type]
@@ -327,7 +358,8 @@ class EdifyGenerator(object):
           self.script.append(
               'package_extract_file("%(fn)s", "%(device)s");' % args)
       else:
-        raise ValueError("don't know how to write \"%s\" partitions" % (p.fs_type,))
+        raise ValueError(
+            "don't know how to write \"%s\" partitions" % p.fs_type)
 
   def SetPermissions(self, fn, uid, gid, mode, selabel, capabilities):
     """Set file ownership and permissions."""
@@ -339,11 +371,12 @@ class EdifyGenerator(object):
       if capabilities is not None:
         cmd += ', "capabilities", %s' % ( capabilities )
       if selabel is not None:
-        cmd += ', "selabel", "%s"' % ( selabel )
+        cmd += ', "selabel", "%s"' % selabel
       cmd += ');'
       self.script.append(cmd)
 
-  def SetPermissionsRecursive(self, fn, uid, gid, dmode, fmode, selabel, capabilities):
+  def SetPermissionsRecursive(self, fn, uid, gid, dmode, fmode, selabel,
+                              capabilities):
     """Recursively set path ownership and permissions."""
     if not self.info.get("use_set_metadata", False):
       self.script.append('set_perm_recursive(%d, %d, 0%o, 0%o, "%s");'
@@ -355,7 +388,7 @@ class EdifyGenerator(object):
       if capabilities is not None:
         cmd += ', "capabilities", "%s"' % ( capabilities )
       if selabel is not None:
-        cmd += ', "selabel", "%s"' % ( selabel )
+        cmd += ', "selabel", "%s"' % selabel
       cmd += ');'
       self.script.append(cmd)
 
@@ -368,15 +401,15 @@ class EdifyGenerator(object):
     for dest, links in sorted(by_dest.iteritems()):
       cmd = ('symlink("%s", ' % (dest,) +
              ",\0".join(['"' + i + '"' for i in sorted(links)]) + ");")
-      self.script.append(self._WordWrap(cmd))
+      self.script.append(self.WordWrap(cmd))
 
   def AppendExtra(self, extra):
     """Append text verbatim to the output script."""
     self.script.append(extra)
 
   def Unmount(self, mount_point):
-    self.script.append('unmount("%s");' % (mount_point,))
-    self.mounts.remove(mount_point);
+    self.script.append('unmount("%s");' % mount_point)
+    self.mounts.remove(mount_point)
 
   def UnmountAll(self):
     for p in sorted(self.mounts):
@@ -399,4 +432,4 @@ class EdifyGenerator(object):
     else:
       data = open(input_path, "rb").read()
     common.ZipWriteStr(output_zip, "META-INF/com/google/android/update-binary",
-                       data, perms=0755)
+                       data, perms=0o755)
