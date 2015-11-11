@@ -184,7 +184,7 @@ endif
 requires_openjdk := false
 ifneq ($(BUILDING_ON_CODEFIRE),true)
 ifeq ($(HOST_OS), linux)
-requires_openjdk := true
+requires_openjdk := false
 endif
 endif
 
