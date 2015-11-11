@@ -43,14 +43,9 @@ OPTIONS = common.OPTIONS
 
 def CopyInfo(output_zip):
   """Copy the android-info.txt file from the input to the output."""
-<<<<<<< HEAD
-  output_zip.write(os.path.join(OPTIONS.input_tmp, "OTA", "android-info.txt"),
-                   "android-info.txt")
-=======
   common.ZipWrite(
       output_zip, os.path.join(OPTIONS.input_tmp, "OTA", "android-info.txt"),
       "android-info.txt")
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 def AddRadio(output_zip):
   """If they exist, add RADIO files to the output."""
@@ -110,17 +105,8 @@ def main(argv):
     if os.path.exists(images_path):
       # If this is a new target-files, it already contains the images,
       # and all we have to do is copy them to the output zip.
-      # Skip oem.img files since they are not needed in fastboot images.
       images = os.listdir(images_path)
       if images:
-<<<<<<< HEAD
-        for i in images:
-          if bootable_only and i not in ("boot.img", "recovery.img"): continue
-          if not i.endswith(".img"): continue
-          if i == "oem.img": continue
-          with open(os.path.join(images_path, i), "r") as f:
-            common.ZipWriteStr(output_zip, i, f.read())
-=======
         for image in images:
           if bootable_only and image not in ("boot.img", "recovery.img"):
             continue
@@ -128,7 +114,6 @@ def main(argv):
             continue
           common.ZipWrite(
               output_zip, os.path.join(images_path, image), image)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
         done = True
 
     if not done:
@@ -170,8 +155,6 @@ def main(argv):
           pass   # no vendor partition for this device
         banner("AddUserdata")
         add_img_to_target_files.AddUserdata(output_zip, prefix="")
-        banner("AddUserdataExtra")
-        add_img_to_target_files.AddUserdataExtra(output_zip, prefix="")
         banner("AddCache")
         add_img_to_target_files.AddCache(output_zip, prefix="")
 

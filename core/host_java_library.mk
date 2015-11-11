@@ -60,11 +60,7 @@ endif
 $(full_classes_emma_jar) : $(full_classes_compiled_jar) | $(EMMA_JAR)
 	$(transform-classes.jar-to-emma)
 
-<<<<<<< HEAD
-$(LOCAL_BUILT_MODULE) : $(full_classes_emma_jar)
-=======
 $(built_javalib_jar) : $(full_classes_emma_jar)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	@echo -e ${CL_YLW}"Copying:"${CL_RST}" $@"
 	$(hide) $(ACP) -fp $< $@
 

@@ -277,22 +277,12 @@ def BuildImage(in_dir, prop_dict, out_file, target_out=None):
       build_command.extend(["-T", str(prop_dict["timestamp"])])
     if fs_config:
       build_command.extend(["-C", fs_config])
-<<<<<<< HEAD
-    if block_list is not None:
-      build_command.extend(["-B", block_list])
-    if "transparent_compression_method" in prop_dict:
-      build_command.extend(["-M", prop_dict["transparent_compression_method"]])
-    if fc_config is not None:
-      build_command.append(fc_config)
-    elif "selinux_fc" in prop_dict:
-=======
     if target_out:
       build_command.extend(["-D", target_out])
     if "block_list" in prop_dict:
       build_command.extend(["-B", prop_dict["block_list"]])
     build_command.extend(["-L", prop_dict["mount_point"]])
     if "selinux_fc" in prop_dict:
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
       build_command.append(prop_dict["selinux_fc"])
   elif fs_type.startswith("squash"):
     build_command = ["mksquashfsimage.sh"]
@@ -429,8 +419,7 @@ def ImagePropFromGlobalDict(glob_dict, mount_point):
       "skip_fsck",
       "verity",
       "verity_key",
-      "verity_signer_cmd",
-      "transparent_compression_method"
+      "verity_signer_cmd"
       )
   for p in common_props:
     copy_prop(p, p)
@@ -438,11 +427,8 @@ def ImagePropFromGlobalDict(glob_dict, mount_point):
   d["mount_point"] = mount_point
   if mount_point == "system":
     copy_prop("fs_type", "fs_type")
-<<<<<<< HEAD
-=======
     # Copy the generic sysetem fs type first, override with specific one if
     # available.
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     copy_prop("system_fs_type", "fs_type")
     copy_prop("system_size", "partition_size")
     copy_prop("system_journal_size", "journal_size")

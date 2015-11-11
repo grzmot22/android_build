@@ -64,10 +64,6 @@ class Options(object):
 
 OPTIONS = Options()
 
-# Stash size cannot exceed cache_size * threshold.
-OPTIONS.cache_size = None
-OPTIONS.stash_threshold = 0.8
-
 
 # Values for "certificate" in apkcerts that mean special things.
 SPECIAL_CERT_STRINGS = ("PRESIGNED", "EXTERNAL")
@@ -321,7 +317,6 @@ def BuildBootableImage(sourcedir, fs_config_file, info_dict=None):
 
   ramdisk_img = tempfile.NamedTemporaryFile()
   img = tempfile.NamedTemporaryFile()
-  bootimg_key = os.getenv("PRODUCT_PRIVATE_KEY", None)
 
   if os.access(fs_config_file, os.F_OK):
     cmd = ["mkbootfs", "-f", fs_config_file, os.path.join(sourcedir, "RAMDISK")]
@@ -333,13 +328,8 @@ def BuildBootableImage(sourcedir, fs_config_file, info_dict=None):
 
   p2.wait()
   p1.wait()
-<<<<<<< HEAD
-  assert p1.returncode == 0, "mkbootfs of %s ramdisk failed" % (targetname,)
-  assert p2.returncode == 0, "minigzip of %s ramdisk failed" % (targetname,)
-=======
   assert p1.returncode == 0, "mkbootfs of %s ramdisk failed" % (sourcedir,)
   assert p2.returncode == 0, "minigzip of %s ramdisk failed" % (sourcedir,)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
   """check if uboot is requested"""
   fn = os.path.join(sourcedir, "ubootargs")
@@ -386,18 +376,6 @@ def BuildBootableImage(sourcedir, fs_config_file, info_dict=None):
       cmd.append("--ramdisk_offset")
       cmd.append(open(fn).read().rstrip("\n"))
 
-<<<<<<< HEAD
-    fn = os.path.join(sourcedir, "dt")
-    if os.access(fn, os.F_OK):
-      cmd.append("--dt")
-      cmd.append(fn)
-
-    fn = os.path.join(sourcedir, "pagesize")
-    if os.access(fn, os.F_OK):
-      kernel_pagesize=open(fn).read().rstrip("\n")
-      cmd.append("--pagesize")
-      cmd.append(kernel_pagesize)
-=======
     fn = os.path.join(sourcedir, "dt_args")
     if os.access(fn, os.F_OK):
       cmd.append("--dt")
@@ -407,16 +385,11 @@ def BuildBootableImage(sourcedir, fs_config_file, info_dict=None):
     if os.access(fn, os.F_OK):
       cmd.append("--pagesize")
       cmd.append(open(fn).read().rstrip("\n"))
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
     args = info_dict.get("mkbootimg_args", None)
     if args and args.strip():
       cmd.extend(shlex.split(args))
 
-<<<<<<< HEAD
-    cmd.extend(["--ramdisk", ramdisk_img.name,
-                "--output", img.name])
-=======
     img_unsigned = None
     if info_dict.get("vboot", None):
       img_unsigned = tempfile.NamedTemporaryFile()
@@ -426,54 +399,13 @@ def BuildBootableImage(sourcedir, fs_config_file, info_dict=None):
       cmd.extend(["--ramdisk", ramdisk_img.name,
                 "--output", img.name])
   
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
   p = Run(cmd, stdout=subprocess.PIPE)
   p.communicate()
   assert p.returncode == 0, "mkbootimg of %s image failed" % (
       os.path.basename(sourcedir),)
 
-<<<<<<< HEAD
-  if bootimg_key and os.path.exists(bootimg_key) and kernel_pagesize > 0:
-    print "Signing bootable image..."
-    bootimg_key_passwords = {}
-    bootimg_key_passwords.update(PasswordManager().GetPasswords(bootimg_key.split()))
-    bootimg_key_password = bootimg_key_passwords[bootimg_key]
-    if bootimg_key_password is not None:
-        bootimg_key_password += "\n"
-    img_sha256 = tempfile.NamedTemporaryFile()
-    img_sig = tempfile.NamedTemporaryFile()
-    img_sig_padded = tempfile.NamedTemporaryFile()
-    img_secure = tempfile.NamedTemporaryFile()
-    p = Run(["openssl", "dgst", "-sha256", "-binary", "-out", img_sha256.name, img.name],
-        stdout=subprocess.PIPE)
-    p.communicate()
-    assert p.returncode == 0, "signing of bootable image failed"
-    p = Run(["openssl", "rsautl", "-sign", "-in", img_sha256.name, "-inkey", bootimg_key, "-out",
-        img_sig.name, "-passin", "stdin"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    p.communicate(bootimg_key_password)
-    assert p.returncode == 0, "signing of bootable image failed"
-    p = Run(["dd", "if=/dev/zero", "of=%s" % img_sig_padded.name, "bs=%s" % kernel_pagesize,
-        "count=1"], stdout=subprocess.PIPE)
-    p.communicate()
-    assert p.returncode == 0, "signing of bootable image failed"
-    p = Run(["dd", "if=%s" % img_sig.name, "of=%s" % img_sig_padded.name, "conv=notrunc"],
-        stdout=subprocess.PIPE)
-    p.communicate()
-    assert p.returncode == 0, "signing of bootable image failed"
-    p = Run(["cat", img.name, img_sig_padded.name], stdout=img_secure.file.fileno())
-    p.communicate()
-    assert p.returncode == 0, "signing of bootable image failed"
-    shutil.copyfile(img_secure.name, img.name)
-    img_sha256.close()
-    img_sig.close()
-    img_sig_padded.close()
-    img_secure.close()
-
-  if info_dict.get("verity_key", None):
-=======
   if (info_dict.get("boot_signer", None) == "true" and
       info_dict.get("verity_key", None)):
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     path = "/" + os.path.basename(sourcedir).lower()
     cmd = [OPTIONS.boot_signer_path]
     cmd.extend(OPTIONS.boot_signer_args)
@@ -1273,25 +1205,17 @@ def ComputeDifferences(diffs):
     threads.pop().join()
 
 
-<<<<<<< HEAD
-class BlockDifference:
-  def __init__(self, partition, tgt, src=None, check_first_block=False, version=None, use_lzma=False):
-=======
 class BlockDifference(object):
   def __init__(self, partition, tgt, src=None, check_first_block=False,
                version=None):
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     self.tgt = tgt
     self.src = src
     self.partition = partition
     self.check_first_block = check_first_block
 
-<<<<<<< HEAD
-=======
     # Due to http://b/20939131, check_first_block is disabled temporarily.
     assert not self.check_first_block
 
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     if version is None:
       version = 1
       if OPTIONS.info_dict:
@@ -1301,11 +1225,7 @@ class BlockDifference(object):
     self.version = version
 
     b = blockimgdiff.BlockImageDiff(tgt, src, threads=OPTIONS.worker_threads,
-<<<<<<< HEAD
-                                    version=self.version, use_lzma=use_lzma)
-=======
                                     version=self.version)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     tmpdir = tempfile.mkdtemp()
     OPTIONS.tempfiles.append(tmpdir)
     self.path = os.path.join(tmpdir, partition)
@@ -1330,27 +1250,13 @@ class BlockDifference(object):
     if not self.src:
       script.Print("Image %s will be patched unconditionally." % (partition,))
     else:
-<<<<<<< HEAD
-=======
       ranges = self.src.care_map.subtract(self.src.clobbered_blocks)
       ranges_str = ranges.to_string_raw()
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
       if self.version >= 3:
         script.AppendExtra(('if (range_sha1("%s", "%s") == "%s" || '
                             'block_image_verify("%s", '
                             'package_extract_file("%s.transfer.list"), '
                             '"%s.new.dat", "%s.patch.dat")) then') % (
-<<<<<<< HEAD
-                            self.device, self.src.care_map.to_string_raw(),
-                            self.src.TotalSha1(),
-                            self.device, partition, partition, partition))
-      else:
-        script.AppendExtra('if range_sha1("%s", "%s") == "%s" then' %
-                            (self.device, self.src.care_map.to_string_raw(),
-                            self.src.TotalSha1()))
-      script.Print('Verified %s image...' % (partition,))
-      script.AppendExtra('else');
-=======
                             self.device, ranges_str, self.src.TotalSha1(),
                             self.device, partition, partition, partition))
       else:
@@ -1358,7 +1264,6 @@ class BlockDifference(object):
                            self.device, ranges_str, self.src.TotalSha1()))
       script.Print('Verified %s image...' % (partition,))
       script.AppendExtra('else')
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
       # When generating incrementals for the system and vendor partitions,
       # explicitly check the first block (which contains the superblock) of
@@ -1408,9 +1313,6 @@ class BlockDifference(object):
         '  abort("%s partition has unexpected contents after OTA update");\n'
         'endif;' % (partition,))
 
-<<<<<<< HEAD
-  def _HashBlocks(self, source, ranges):
-=======
   def _WriteUpdate(self, script, output_zip):
     ZipWrite(output_zip,
              '{}.transfer.list'.format(self.path),
@@ -1430,7 +1332,6 @@ class BlockDifference(object):
     script.AppendExtra(script.WordWrap(call))
 
   def _HashBlocks(self, source, ranges): # pylint: disable=no-self-use
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     data = source.ReadRangeSet(ranges)
     ctx = sha1()
 
@@ -1439,11 +1340,6 @@ class BlockDifference(object):
 
     return ctx.hexdigest()
 
-<<<<<<< HEAD
-  def _CheckFirstBlock(self, script):
-    r = RangeSet((0, 1))
-    srchash = self._HashBlocks(self.src, r);
-=======
   def _HashZeroBlocks(self, num_blocks): # pylint: disable=no-self-use
     """Return the hash value for all zero blocks."""
     zero_block = '\x00' * 4096
@@ -1459,7 +1355,6 @@ class BlockDifference(object):
   def _CheckFirstBlock(self, script):
     r = rangelib.RangeSet((0, 1))
     srchash = self._HashBlocks(self.src, r)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
     script.AppendExtra(('(range_sha1("%s", "%s") == "%s") || '
                         'abort("%s has been remounted R/W; '
@@ -1471,14 +1366,6 @@ DataImage = blockimgdiff.DataImage
 
 
 # map recovery.fstab's fs_types to mount/format "partition types"
-<<<<<<< HEAD
-PARTITION_TYPES = { "yaffs2": "MTD", "mtd": "MTD",
-                    "ext4": "EMMC", "emmc": "EMMC",
-                    "f2fs": "EMMC",
-                    "ext2": "EMMC",
-                    "ext3": "EMMC",
-                    "vfat": "EMMC" }
-=======
 PARTITION_TYPES = {
     "yaffs2": "MTD",
     "mtd": "MTD",
@@ -1490,7 +1377,6 @@ PARTITION_TYPES = {
     "ext3": "EMMC",
     "vfat": "EMMC"
 }
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 def GetTypeAndDevice(mount_point, info):
   fstab = info["fstab"]

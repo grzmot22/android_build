@@ -147,24 +147,10 @@ $(warning ************************************************************)
 $(error Directory names containing spaces not supported)
 endif
 
-java_version_str := $(shell unset _JAVA_OPTIONS JAVA_TOOL_OPTIONS && java -version 2>&1)
-javac_version_str := $(shell unset _JAVA_OPTIONS JAVA_TOOL_OPTIONS && javac -version 2>&1)
+java_version_str := $(shell unset _JAVA_OPTIONS && java -version 2>&1)
+javac_version_str := $(shell unset _JAVA_OPTIONS && javac -version 2>&1)
 
 # Check for the correct version of java, should be 1.7 by
-<<<<<<< HEAD
-# default, and 1.6 if LEGACY_USE_JAVA6 is set.
-ifeq ($(LEGACY_USE_JAVA6),)
-required_version := "1.7.x/1.8.x"
-required_javac_version := "1.7/1.8"
-java_version := $(shell echo '$(java_version_str)' | grep -E '^(java|openjdk) .*[ "]1\.[78][\. "$$]')
-javac_version := $(shell echo '$(javac_version_str)' | grep '[ "]1\.[78][\. "$$]')
-else # if LEGACY_USE_JAVA6
-required_version := "1.6.x"
-required_javac_version := "1.6"
-java_version := $(shell echo '$(java_version_str)' | grep '^java .*[ "]1\.6[\. "$$]')
-javac_version := $(shell echo '$(javac_version_str)' | grep '[ "]1\.6[\. "$$]')
-endif # if LEGACY_USE_JAVA6
-=======
 # default, and 1.8 if EXPERIMENTAL_USE_JAVA8 is set
 ifneq ($(EXPERIMENTAL_USE_JAVA8),)
 required_version := "1.8.x"
@@ -177,7 +163,6 @@ required_javac_version := "1.7"
 java_version := $(shell echo '$(java_version_str)' | grep '^java .*[ "]1\.7[\. "$$]')
 javac_version := $(shell echo '$(javac_version_str)' | grep '[ "]1\.7[\. "$$]')
 endif # if EXPERIMENTAL_USE_JAVA8
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 ifeq ($(strip $(java_version)),)
 $(info ************************************************************)
@@ -190,7 +175,7 @@ $(info $(space))
 $(info Please follow the machine setup instructions at)
 $(info $(space)$(space)$(space)$(space)https://source.android.com/source/initializing.html)
 $(info ************************************************************)
-
+$(error stop)
 endif
 
 # Check for the current JDK.
@@ -198,13 +183,8 @@ endif
 # For Java 1.7, we require OpenJDK on linux and Oracle JDK on Mac OS.
 requires_openjdk := false
 ifneq ($(BUILDING_ON_CODEFIRE),true)
-<<<<<<< HEAD
-ifeq ($(LEGACY_USE_JAVA6),)
-=======
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 ifeq ($(HOST_OS), linux)
-requires_openjdk := false
-endif
+requires_openjdk := true
 endif
 endif
 
@@ -217,6 +197,7 @@ $(info ************************************************************)
 $(info You asked for an OpenJDK 7 build but your version is)
 $(info $(java_version_str).)
 $(info ************************************************************)
+$(error stop)
 endif # java version is not OpenJdk
 else # if requires_openjdk
 ifneq ($(shell echo '$(java_version_str)' | grep -i openjdk),)
@@ -227,11 +208,7 @@ $(info You use OpenJDK but only Oracle JDK is supported.)
 $(info Please follow the machine setup instructions at)
 $(info $(space)$(space)$(space)$(space)https://source.android.com/source/download.html)
 $(info ************************************************************)
-<<<<<<< HEAD
-
-=======
 $(error stop)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endif # java version is not Oracle JDK
 endif # if requires_openjdk
 
@@ -247,6 +224,7 @@ $(info $(space))
 $(info Please follow the machine setup instructions at)
 $(info $(space)$(space)$(space)$(space)https://source.android.com/source/download.html)
 $(info ************************************************************)
+$(error stop)
 endif
 
 
@@ -359,18 +337,10 @@ ifneq (,$(user_variant))
   # explicitly disabled and the build is running on Linux (since host
   # Dalvik isn't built for non-Linux hosts).
   ifeq (,$(WITH_DEXPREOPT))
-<<<<<<< HEAD
-    ifeq ($(DALVIK_VM_LIB),libdvm.so)
-      ifeq ($(user_variant),user)
-        ifeq ($(HOST_OS),linux)
-          WITH_DEXPREOPT := false
-        endif
-=======
     ifeq ($(user_variant),user)
       ifeq ($(HOST_OS),linux)
         # TODO: turn on WITH_DEXPREOPT for libart user builds.
         # WITH_DEXPREOPT := true
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
       endif
     endif
   endif
@@ -740,15 +710,15 @@ else
 endif
 
 eng_MODULES := $(sort \
-        $(call module-installed-files, $(call module-names-for-tag-list,eng)) \
+        $(call get-tagged-modules,eng) \
         $(call module-installed-files, $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_PACKAGES_ENG)) \
     )
 debug_MODULES := $(sort \
-        $(call module-installed-files, $(call module-names-for-tag-list,debug)) \
+        $(call get-tagged-modules,debug) \
         $(call module-installed-files, $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_PACKAGES_DEBUG)) \
     )
 tests_MODULES := $(sort \
-        $(call module-installed-files, $(call module-names-for-tag-list,tests)) \
+        $(call get-tagged-modules,tests) \
         $(call module-installed-files, $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_PACKAGES_TESTS)) \
     )
 

@@ -83,10 +83,7 @@ $(common_javalib.jar): PRIVATE_SOURCE_ARCHIVE := $(full_classes_jarjar_jar)
 $(common_javalib.jar): PRIVATE_DONT_DELETE_JAR_DIRS := $(LOCAL_DONT_DELETE_JAR_DIRS)
 $(common_javalib.jar) : $(built_dex) $(java_resource_sources)
 	@echo -e ${CL_GRN}"target Jar:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-<<<<<<< HEAD
-=======
 ifdef LOCAL_JACK_ENABLED
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	$(create-empty-package)
 else
 	$(call initialize-package-file,$(PRIVATE_SOURCE_ARCHIVE),$@)

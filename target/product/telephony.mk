@@ -20,10 +20,7 @@
 PRODUCT_PACKAGES := \
     CarrierConfig \
     Dialer \
-<<<<<<< HEAD
-=======
     CallLogBackup \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     InCallUI \
     Mms \
     rild

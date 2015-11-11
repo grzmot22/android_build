@@ -357,11 +357,7 @@ ifdef full_classes_jar
 # - This extra copy, with the dependency on LOCAL_BUILT_MODULE allows the
 #   PRIVATE_ vars to be preserved.
 $(full_classes_stubs_jar): PRIVATE_SOURCE_FILE := $(full_classes_jar)
-<<<<<<< HEAD
-$(full_classes_stubs_jar) : $(LOCAL_BUILT_MODULE) | $(ACP)
-=======
 $(full_classes_stubs_jar) : $(full_classes_jar) | $(ACP)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	@echo -e ${CL_GRN}"Copying"${CL_RST}" $(PRIVATE_SOURCE_FILE)"
 	$(hide) $(ACP) -fp $(PRIVATE_SOURCE_FILE) $@
 ALL_MODULES.$(LOCAL_MODULE).STUBS := $(full_classes_stubs_jar)

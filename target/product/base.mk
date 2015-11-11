@@ -117,10 +117,7 @@ PRODUCT_PACKAGES += \
     sm \
     svc \
     tc \
-<<<<<<< HEAD
-=======
     telecom \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     tm \
     vdc \
     vold \

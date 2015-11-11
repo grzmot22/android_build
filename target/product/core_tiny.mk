@@ -54,10 +54,7 @@ PRODUCT_PACKAGES += \
     ip-up-vpn \
     ip6tables \
     iptables \
-<<<<<<< HEAD
-=======
     gatekeeperd \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     javax.btobex \
     keystore \
     keystore.default \

@@ -368,6 +368,7 @@ ifneq ($(LOCAL_NO_SYNTAX_CHECK),true)
 endif
 endif
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_CXX := $(my_cxx)
+$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_CLANG := $(my_clang)
 
 # TODO: support a mix of standard extensions so that this isn't necessary
 LOCAL_CPP_EXTENSION := $(strip $(LOCAL_CPP_EXTENSION))
@@ -922,12 +923,8 @@ import_includes_deps := $(strip \
       $(call intermediates-dir-for,SHARED_LIBRARIES,$(l),$(LOCAL_IS_HOST_MODULE),,$(LOCAL_2ND_ARCH_VAR_PREFIX))/export_includes) \
     $(foreach l, $(my_static_libraries) $(my_whole_static_libraries), \
       $(call intermediates-dir-for,STATIC_LIBRARIES,$(l),$(LOCAL_IS_HOST_MODULE),,$(LOCAL_2ND_ARCH_VAR_PREFIX))/export_includes))
-<<<<<<< HEAD
-$(import_includes) : $(import_includes_deps)
-=======
 $(import_includes): PRIVATE_IMPORT_EXPORT_INCLUDES := $(import_includes_deps)
 $(import_includes) : $(LOCAL_MODULE_MAKEFILE) $(import_includes_deps)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	@echo -e ${CL_CYN}Import includes file:${CL_RST} $@
 	$(hide) mkdir -p $(dir $@) && rm -f $@
 ifdef import_includes_deps
@@ -1057,7 +1054,7 @@ installed_static_library_notice_file_targets := \
 
 # Default is -fno-rtti.
 ifeq ($(strip $(LOCAL_RTTI_FLAG)),)
-LOCAL_RTTI_FLAG := -fno-rtti -D_LIBCPP_NO_RTTI
+LOCAL_RTTI_FLAG := -fno-rtti
 endif
 
 ###########################################################
@@ -1086,15 +1083,6 @@ ifeq ($(my_fdo_build), true)
   fdo_incompatible_flags := -fno-early-inlining -finline-limit=%
   my_cflags := $(filter-out $(fdo_incompatible_flags),$(my_cflags))
 endif
-
-# No one should ever use this flag. On GCC it's mere presence will disable all
-# warnings, even those that are specified after it (contrary to typical warning
-# flag behavior). This circumvents CFLAGS_NO_OVERRIDE from forcibly enabling the
-# warnings that are *always* bugs.
-my_illegal_flags := -w
-my_cflags := $(filter-out $(my_illegal_flags),$(my_cflags))
-my_cppflags := $(filter-out $(my_illegal_flags),$(my_cppflags))
-my_conlyflags := $(filter-out $(my_illegal_flags),$(my_conlyflags))
 
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_YACCFLAGS := $(LOCAL_YACCFLAGS)
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_ASFLAGS := $(my_asflags)

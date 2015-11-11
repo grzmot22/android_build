@@ -57,14 +57,6 @@ ifeq ($(LOCAL_MODULE_CLASS),EXECUTABLES)
   my_pack_module_relocations := false
 endif
 
-<<<<<<< HEAD
-#TODO: write the real $(STRIPPER) rule.
-#TODO: define a rule to build TARGET_SYMBOL_FILTER_FILE, and
-#      make it depend on ALL_ORIGINAL_DYNAMIC_BINARIES.
-$(compress_output): $(compress_input) $(TARGET_SYMBOL_FILTER_FILE) | $(ACP)
-	@echo -e ${CL_GRN}"target Compress Symbols:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-	$(copy-file-to-target)
-=======
 # TODO (dimitry): Relocation packer is not yet available for darwin
 ifneq ($(HOST_OS),linux)
   my_pack_module_relocations := false
@@ -74,7 +66,6 @@ ifeq (true,$(my_pack_module_relocations))
 # Pack relocations
 $(relocation_packer_output): $(relocation_packer_input) | $(ACP)
 	$(pack-elf-relocations)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 else
 $(relocation_packer_output): $(relocation_packer_input) | $(ACP)
 	@echo "target Unpacked: $(PRIVATE_MODULE) ($@)"

@@ -133,22 +133,6 @@ class EdifyGenerator(object):
            ' || abort("This package supports bootloader(s): ' +
            ", ".join(["%s" % (b,) for b in bootloaders]) +
            '; this device has bootloader " + getprop("ro.bootloader") + ".");' +
-<<<<<<< HEAD
-           ");")
-    self.script.append(self._WordWrap(cmd))
-
-  def AssertSomeBaseband(self, *basebands):
-    """Assert that the baseband version is one of *basebands."""
-    cmd = ("assert(" +
-           " || ".join(['getprop("ro.baseband") == "%s"' % (b,)
-                         for b in basebands]) +
-           ' || abort("This package supports baseband(s): ' +
-           ", ".join(["%s" % (b,) for b in basebands]) +
-           '; this device has baseband " + getprop("ro.baseband") + ".");' +
-           ");")
-    self.script.append(self._WordWrap(cmd))
-
-=======
            ");")
     self.script.append(self.WordWrap(cmd))
 
@@ -163,7 +147,6 @@ class EdifyGenerator(object):
            ");")
     self.script.append(self._WordWrap(cmd))
 
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
   def RunBackup(self, command):
     self.script.append(('run_program("/tmp/install/bin/backuptool.sh", "%s");' % command))
 
@@ -295,15 +278,6 @@ class EdifyGenerator(object):
              'delete("{name}");'.format(name=name, sha1=sha1))
       self.script.append(self.WordWrap(cmd))
 
-  def DeleteFilesIfNotMatching(self, file_list):
-    """Delete the file in file_list if not matching the checksum."""
-    if not file_list:
-      return
-    for name, sha1 in file_list:
-      cmd = ('sha1_check(read_file("{name}"), "{sha1}") || '
-             'delete("{name}");'.format(name=name, sha1=sha1))
-      self.script.append(self._WordWrap(cmd))
-
   def RenameFile(self, srcfile, tgtfile):
     """Moves a file from one location to another."""
     if self.info.get("update_rename_support", False):
@@ -316,11 +290,7 @@ class EdifyGenerator(object):
        skip the action if the file exists.  Used when a patch
        is later renamed."""
     cmd = ('sha1_check(read_file("%s"), %s) ||' % (tgtfile, tgtsha1))
-<<<<<<< HEAD
-    self.script.append(self._WordWrap(cmd))
-=======
     self.script.append(self.WordWrap(cmd))
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
   def ApplyPatch(self, srcfile, tgtfile, tgtsize, tgtsha1, *patchpairs):
     """Apply binary patches (in *patchpairs) to the given srcfile to

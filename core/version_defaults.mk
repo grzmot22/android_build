@@ -42,11 +42,7 @@ ifeq "" "$(PLATFORM_VERSION)"
   # which is the version that we reveal to the end user.
   # Update this value when the platform version changes (rather
   # than overriding it somewhere else).  Can be an arbitrary string.
-<<<<<<< HEAD
-  PLATFORM_VERSION := 5.1.1
-=======
   PLATFORM_VERSION := 6.0
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endif
 
 ifeq "" "$(PLATFORM_SDK_VERSION)"
@@ -72,22 +68,6 @@ ifeq "" "$(PLATFORM_VERSION_CODENAME)"
   PLATFORM_VERSION_ALL_CODENAMES := $(PLATFORM_VERSION_CODENAME)
 endif
 
-<<<<<<< HEAD
-ifeq "" "$(PLATFORM_SECURITY_PATCH)"
-  # Used to indicate the security patch that has been applied to the device.
-  # Can be an arbitrary string, but must be a single word.
-  #
-  # If there is no $PLATFORM_SECURITY_PATCH set, keep it empty.
-  PLATFORM_SECURITY_PATCH := 2015-11-01
-endif
-
-ifeq "" "$(PLATFORM_BASE_OS)"
-  # Used to indicate the base os applied to the device.
-  # Can be an arbitrary string, but must be a single word.
-  #
-  # If there is no $PLATFORM_BASE_OS set, keep it empty.
-  PLATFORM_BASE_OS :=
-=======
 ifeq "REL" "$(PLATFORM_VERSION_CODENAME)"
   PLATFORM_PREVIEW_SDK_VERSION := 0
 else
@@ -103,7 +83,6 @@ else
     # This value will always be 0 for release builds.
     PLATFORM_PREVIEW_SDK_VERSION := 0
   endif
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endif
 
 ifeq "" "$(DEFAULT_APP_TARGET_SDK)"

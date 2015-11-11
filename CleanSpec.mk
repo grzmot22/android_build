@@ -325,9 +325,6 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/build.prop)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/APPS/*)
 
-<<<<<<< HEAD
-# 5.1.1!
-=======
 # Remove ro.product.locale.language/country and add ro.product.locale
 # instead.
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/build.prop)
@@ -368,15 +365,10 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/APPS/*)
 
 # 23 is becoming more alive!!!
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/build.prop)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/APPS/*)
 
-<<<<<<< HEAD
-# Added new build props
-=======
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/build.prop)
 
 # ************************************************

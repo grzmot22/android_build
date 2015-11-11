@@ -25,21 +25,13 @@ CLANG_CONFIG_EXTRA_CONLYFLAGS := -std=gnu99
 CLANG_CONFIG_EXTRA_CPPFLAGS :=
 CLANG_CONFIG_EXTRA_LDFLAGS :=
 
-# ArchiDroid
-include $(BUILD_SYSTEM)/archidroid.mk
-CLANG_CONFIG_EXTRA_CFLAGS += $(ARCHIDROID_CLANG_CFLAGS)
-CLANG_CONFIG_EXTRA_CPPFLAGS += $(ARCHIDROID_CLANG_CPPFLAGS)
-CLANG_CONFIG_EXTRA_LDFLAGS += $(ARCHIDROID_CLANG_LDFLAGS)
-
 CLANG_CONFIG_EXTRA_CFLAGS += \
-  -w -O3 -Qunused-arguments -Wno-unknown-warning-option -D__compiler_offsetof=__builtin_offsetof
+  -D__compiler_offsetof=__builtin_offsetof
 
 # Help catch common 32/64-bit errors.
 CLANG_CONFIG_EXTRA_CFLAGS += \
   -Werror=int-conversion
 
-<<<<<<< HEAD
-=======
 # Disable overly aggressive warning for macros defined with a leading underscore
 # This happens in AndroidConfig.h, which is included nearly everywhere.
 CLANG_CONFIG_EXTRA_CFLAGS += \
@@ -50,18 +42,11 @@ CLANG_CONFIG_EXTRA_CFLAGS += \
 CLANG_CONFIG_EXTRA_CFLAGS += \
   -Wno-format-pedantic
 
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 # Workaround for ccache with clang.
 # See http://petereisentraut.blogspot.com/2011/05/ccache-and-clang.html.
 CLANG_CONFIG_EXTRA_CFLAGS += \
   -Wno-unused-command-line-argument
 
-<<<<<<< HEAD
-CLANG_CONFIG_UNKNOWN_CFLAGS := \
-  $(ARCHIDROID_CLANG_UNKNOWN_FLAGS) \
-  -funswitch-loops \
-  -fno-tree-sra \
-=======
 # Disable -Winconsistent-missing-override until we can clean up the existing
 # codebase for it.
 CLANG_CONFIG_EXTRA_CPPFLAGS += \
@@ -69,7 +54,6 @@ CLANG_CONFIG_EXTRA_CPPFLAGS += \
 
 CLANG_CONFIG_UNKNOWN_CFLAGS := \
   -finline-functions \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
   -finline-limit=64 \
   -fno-canonical-system-headers \
   -Wno-clobbered \
@@ -82,12 +66,6 @@ CLANG_CONFIG_UNKNOWN_CFLAGS := \
   -Wmaybe-uninitialized \
   -Wno-error=clobbered \
   -Wno-error=maybe-uninitialized \
-<<<<<<< HEAD
-  -fno-canonical-system-headers \
-  -fmodulo-sched \
-  -fmodulo-sched-allow-regmoves \
-  -mvectorize-with-neon-quad
-=======
   -Wno-error=unused-but-set-parameter \
   -Wno-error=unused-but-set-variable \
   -Wno-free-nonheap-object \
@@ -100,7 +78,6 @@ CLANG_CONFIG_UNKNOWN_CFLAGS := \
   -Wno-unused-local-typedefs \
   -Wunused-but-set-parameter \
   -Wunused-but-set-variable
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 # Clang flags for all host rules
 CLANG_CONFIG_HOST_EXTRA_ASFLAGS :=

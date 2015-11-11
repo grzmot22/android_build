@@ -119,7 +119,6 @@ FRAMEWORKS_BASE_SUBDIRS := \
 	    wifi \
 	    keystore \
 	    rs \
-	    security-bridge \
 	 )
 
 #

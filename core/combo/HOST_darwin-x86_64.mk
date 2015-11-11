@@ -35,21 +35,6 @@ HOST_TOOLCHAIN_ROOT := prebuilts/gcc/darwin-x86/host/i686-apple-darwin-4.2.1
 HOST_TOOLCHAIN_PREFIX := $(HOST_TOOLCHAIN_ROOT)/bin/i686-apple-darwin$(gcc_darwin_version)
 HOST_CC  := $(HOST_TOOLCHAIN_PREFIX)-gcc
 HOST_CXX := $(HOST_TOOLCHAIN_PREFIX)-g++
-<<<<<<< HEAD
-
-ifeq ($(mac_sdk_version), $(filter $(mac_sdk_version), 10.8 10.9 10.10))
-# Mac SDK 10.8 and later does not have stdarg.h, etc
-host_toolchain_header := $(HOST_TOOLCHAIN_ROOT)/lib/gcc/i686-apple-darwin$(gcc_darwin_version)/4.2.1/include
-HOST_GLOBAL_CFLAGS += -isystem $(host_toolchain_header)
-HOST_GLOBAL_CPPFLAGS += -isystem $(mac_sdk_root)/usr/include/c++/4.2.1
-endif # $(mac_sdk_version)
-
-else
-HOST_CC := gcc
-HOST_CXX := g++
-endif # $(HOST_TOOLCHAIN_PREFIX)-gcc exists
-=======
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 # gcc location for clang; to be updated when clang is updated
 # HOST_TOOLCHAIN_ROOT is a Darwin-specific define
@@ -76,14 +61,6 @@ HOST_JNILIB_SUFFIX := .jnilib
 HOST_GLOBAL_CFLAGS += \
     -include $(call select-android-config-h,darwin-x86)
 
-<<<<<<< HEAD
-ifneq ($(filter 10.7 10.7.% 10.8 10.8.% 10.9 10.9.% 10.10 10.10.%, $(build_mac_version)),)
-       HOST_RUN_RANLIB_AFTER_COPYING := false
-else
-       HOST_RUN_RANLIB_AFTER_COPYING := true
-endif
-=======
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 HOST_GLOBAL_ARFLAGS := cqs
 
 # We Reuse the following functions with the same name from HOST_darwin-x86.mk:

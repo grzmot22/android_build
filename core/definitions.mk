@@ -378,10 +378,6 @@ define find-other-java-files
 	$(call find-subdir-files,$(1) -name "*.java" -and -not -name ".*")
 endef
 
-define find-other-aidl-files
-	$(call find-subdir-files,$(1) -name "*.aidl" -and -not -name ".*")
-endef
-
 define find-other-html-files
 	$(call find-subdir-files,$(1) -name "*.html" -and -not -name ".*")
 endef
@@ -1092,15 +1088,11 @@ endef
 
 define transform-c-to-o-no-deps
 @echo -e ${CL_GRN}"target $(PRIVATE_ARM_MODE) C:"${CL_RST}" $(PRIVATE_MODULE) <= $<"
-<<<<<<< HEAD
-$(call transform-c-or-s-to-o-no-deps, $(PRIVATE_CFLAGS) $(PRIVATE_CONLYFLAGS) $(PRIVATE_DEBUG_CFLAGS))
-=======
 $(call transform-c-or-s-to-o-no-deps, \
     $(PRIVATE_CFLAGS) \
     $(PRIVATE_CONLYFLAGS) \
     $(PRIVATE_DEBUG_CFLAGS) \
     $(GLOBAL_CFLAGS_NO_OVERRIDE))
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 define transform-s-to-o-no-deps
@@ -1466,17 +1458,9 @@ endef
 
 define transform-o-to-shared-lib-inner
 $(hide) $(PRIVATE_CXX) \
-<<<<<<< HEAD
-	$(PRIVATE_TARGET_GLOBAL_LDFLAGS) \
-	-Wl,-rpath-link=$(PRIVATE_TARGET_OUT_INTERMEDIATE_LIBRARIES) \
-	-Wl,-rpath,\$$ORIGIN/../lib \
-	-shared -Wl,-soname,$(notdir $@) \
-	$(PRIVATE_LDFLAGS) \
-=======
 	-nostdlib -Wl,-soname,$(notdir $@) \
 	-Wl,--gc-sections \
 	$(if $(filter true,$(PRIVATE_CLANG)),-shared,-Wl$(comma)-shared) \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 	$(PRIVATE_TARGET_GLOBAL_LD_DIRS) \
 	$(if $(filter true,$(PRIVATE_NO_CRT)),,$(PRIVATE_TARGET_CRTBEGIN_SO_O)) \
 	$(PRIVATE_ALL_OBJECTS) \
@@ -1501,11 +1485,7 @@ endef
 define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 @echo -e ${CL_GRN}"target SharedLib:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-<<<<<<< HEAD
-$($(PRIVATE_2ND_ARCH_VAR_PREFIX)transform-o-to-shared-lib-inner)
-=======
 $(transform-o-to-shared-lib-inner)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 
@@ -1521,12 +1501,8 @@ endif
 define transform-to-stripped
 @mkdir -p $(dir $@)
 @echo -e ${CL_GRN}"target Strip:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-<<<<<<< HEAD
-$(hide) $(PRIVATE_STRIP) --strip-all $< -o $@ $(TARGET_STRIP_EXTRA)
-=======
 $(hide) $(PRIVATE_STRIP) --strip-all $< -o $@ \
   $(if $(PRIVATE_NO_DEBUGLINK),,$(TARGET_STRIP_EXTRA))
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 define transform-to-stripped-keep-symbols
@@ -1582,11 +1558,7 @@ endef
 define transform-o-to-executable
 @mkdir -p $(dir $@)
 @echo -e ${CL_GRN}"target Executable:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-<<<<<<< HEAD
-$($(PRIVATE_2ND_ARCH_VAR_PREFIX)transform-o-to-executable-inner)
-=======
 $(transform-o-to-executable-inner)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 
@@ -1630,11 +1602,7 @@ endef
 define transform-o-to-static-executable
 @mkdir -p $(dir $@)
 @echo -e ${CL_GRN}"target StaticExecutable:"${CL_RST}" $(PRIVATE_MODULE) ($@)"
-<<<<<<< HEAD
-$($(PRIVATE_2ND_ARCH_VAR_PREFIX)transform-o-to-static-executable-inner)
-=======
 $(transform-o-to-static-executable-inner)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 
@@ -1865,47 +1833,12 @@ $(hide) rm -f $@
 $(hide) rm -f $(PRIVATE_CLASSES_JACK)
 $(hide) rm -rf $(PRIVATE_JACK_INTERMEDIATES_DIR)
 $(hide) mkdir -p $(dir $@)
-<<<<<<< HEAD
-$(hide) mkdir -p $(PRIVATE_CLASS_INTERMEDIATES_DIR)
-$(hide) touch $(PRIVATE_CLASS_INTERMEDIATES_DIR)/newstamp
-$(call unzip-jar-files,$(PRIVATE_STATIC_JAVA_LIBRARIES),$(PRIVATE_CLASS_INTERMEDIATES_DIR))
-$(hide) if [ -e $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stamp ] ; then \
-        newerFlag=$$(echo -n "-newer $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stamp") ; \
-    fi ; \
-    find $(PRIVATE_JAVA_SOURCES) $$newerFlag > $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list ; \
-    if [ -d "$(PRIVATE_SOURCE_INTERMEDIATES_DIR)" ]; then \
-        find $(PRIVATE_SOURCE_INTERMEDIATES_DIR) -name '*.java' $$newerFlag >> $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list; \
-    fi
-$(hide) tr ' ' '\n' < $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list \
-    | sort -u > $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list-uniq
-@echo -e ${CL_YLW}"(Incremental) build source files:"${CL_RST}""
-@cat $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list-uniq
-$(hide) if [ -s $(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list-uniq ] ; then \
-    $(1) -encoding UTF-8 \
-    $(strip $(PRIVATE_JAVAC_DEBUG_FLAGS)) \
-    $(if $(findstring true,$(PRIVATE_WARNINGS_ENABLE)),$(xlint_unchecked),) \
-    $(2) \
-    $(addprefix -classpath ,$(strip \
-        $(call normalize-path-list,$(PRIVATE_ALL_JAVA_LIBRARIES) $(PRIVATE_CLASS_INTERMEDIATES_DIR)))) \
-    $(if $(findstring true,$(PRIVATE_WARNINGS_ENABLE)),$(xlint_unchecked),) \
-    -extdirs "" -d $(PRIVATE_CLASS_INTERMEDIATES_DIR) \
-    $(PRIVATE_JAVACFLAGS) \
-    \@$(PRIVATE_CLASS_INTERMEDIATES_DIR)/java-source-list-uniq \
-    2>$(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr \
-    && ( [ -s $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr ] && \
-    echo -e ${CL_YLW}"`cat $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr`"${CL_RST} 1>&2; \
-    rm -f $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr ) \
-    || ( [ -s $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr ] && \
-    echo -e ${CL_RED}"`cat $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stderr`"${CL_RST} 1>&2; \
-    rm -f $(PRIVATE_CLASS_INTERMEDIATES_DIR)/srderr; exit 41 ) \
-=======
 $(hide) mkdir -p $(dir $(PRIVATE_CLASSES_JACK))
 $(hide) mkdir -p $(PRIVATE_JACK_INTERMEDIATES_DIR)
 $(if $(PRIVATE_JACK_INCREMENTAL_DIR),$(hide) mkdir -p $(PRIVATE_JACK_INCREMENTAL_DIR))
 $(call dump-words-to-file,$(PRIVATE_JAVA_SOURCES),$(PRIVATE_JACK_INTERMEDIATES_DIR)/java-source-list)
 $(hide) if [ -d "$(PRIVATE_SOURCE_INTERMEDIATES_DIR)" ]; then \
           find $(PRIVATE_SOURCE_INTERMEDIATES_DIR) -name '*.java' >> $(PRIVATE_JACK_INTERMEDIATES_DIR)/java-source-list; \
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 fi
 $(hide) tr ' ' '\n' < $(PRIVATE_JACK_INTERMEDIATES_DIR)/java-source-list \
     | sort -u > $(PRIVATE_JACK_INTERMEDIATES_DIR)/java-source-list-uniq
@@ -1979,33 +1912,6 @@ endef
 # - we filter out duplicate java file names because Jack doesn't like them.
 define java-to-jack
 $(hide) rm -f $@
-<<<<<<< HEAD
-$(if $(PRIVATE_JAR_EXCLUDE_FILES), $(hide) find $(PRIVATE_CLASS_INTERMEDIATES_DIR) \
-    -name $(word 1, $(PRIVATE_JAR_EXCLUDE_FILES)) \
-    $(addprefix -o -name , $(wordlist 2, 999, $(PRIVATE_JAR_EXCLUDE_FILES))) \
-    | xargs rm -rf)
-$(if $(PRIVATE_JAR_PACKAGES), \
-    $(hide) find $(PRIVATE_CLASS_INTERMEDIATES_DIR) -mindepth 1 -type f \
-        $(foreach pkg, $(PRIVATE_JAR_PACKAGES), \
-            -not -path $(PRIVATE_CLASS_INTERMEDIATES_DIR)/$(subst .,/,$(pkg))/\*) -delete ; \
-        find $(PRIVATE_CLASS_INTERMEDIATES_DIR) -empty -delete)
-$(if $(PRIVATE_JAR_EXCLUDE_PACKAGES), $(hide) rm -rf \
-    $(foreach pkg, $(PRIVATE_JAR_EXCLUDE_PACKAGES), \
-        $(PRIVATE_CLASS_INTERMEDIATES_DIR)/$(subst .,/,$(pkg))))
-$(if $(PRIVATE_RMTYPEDEFS), $(hide) $(RMTYPEDEFS) -v $(PRIVATE_CLASS_INTERMEDIATES_DIR))
-$(if $(PRIVATE_JAR_MANIFEST), \
-    $(hide) sed -e 's/%BUILD_NUMBER%/$(BUILD_NUMBER)/' \
-            $(PRIVATE_JAR_MANIFEST) > $(dir $@)/manifest.mf && \
-        jar -cfm $@ $(dir $@)/manifest.mf \
-            -C $(PRIVATE_CLASS_INTERMEDIATES_DIR) ., \
-    $(hide) jar -cf $@ -C $(PRIVATE_CLASS_INTERMEDIATES_DIR) .)
-$(hide) mv $(PRIVATE_CLASS_INTERMEDIATES_DIR)/newstamp $(PRIVATE_CLASS_INTERMEDIATES_DIR)/stamp
-endef
-
-define transform-java-to-classes.jar
-@echo -e ${CL_GRN}"target Java:"${CL_RST}" $(PRIVATE_MODULE) ($(PRIVATE_CLASS_INTERMEDIATES_DIR))"
-$(call compile-java,$(TARGET_JAVAC),$(PRIVATE_BOOTCLASSPATH))
-=======
 $(hide) rm -rf $(PRIVATE_JACK_INTERMEDIATES_DIR)
 $(hide) mkdir -p $(dir $@)
 $(hide) mkdir -p $(PRIVATE_JACK_INTERMEDIATES_DIR)
@@ -2055,7 +1961,6 @@ $(hide) mv $(PRIVATE_JACK_INTERMEDIATES_DIR)/java-source-list-uniq $(PRIVATE_JAC
 $(if $(PRIVATE_JAR_PACKAGES), $(hide) echo unsupported options PRIVATE_JAR_PACKAGES in $@; exit 53)
 $(if $(PRIVATE_JAR_EXCLUDE_PACKAGES), $(hide) echo unsupported options JAR_EXCLUDE_PACKAGES in $@; exit 53)
 $(if $(PRIVATE_JAR_MANIFEST), $(hide) echo unsupported options JAR_MANIFEST in $@; exit 53)
->>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 endef
 
 define transform-classes.jar-to-emma
@@ -2172,7 +2077,7 @@ endef
 
 #TODO: update the manifest to point to the dex file
 define add-dex-to-package
-$(hide) zip -0qj $@ $(dir $(PRIVATE_DEX_FILE))classes*.dex
+$(hide) zip -qj $@ $(dir $(PRIVATE_DEX_FILE))classes*.dex
 endef
 
 # Add java resources added by the current module.
