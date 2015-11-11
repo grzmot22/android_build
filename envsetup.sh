@@ -17,6 +17,8 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - ggrep:   Greps on all local Gradle files.
 - jgrep:   Greps on all local Java files.
 - resgrep: Greps on all local res/*.xml files.
+- mangrep: Greps on all local AndroidManifest.xml files.
+- sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
 - cmremote: Add git remote for CM Gerrit Review
@@ -32,6 +34,14 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - repopick: Utility to fetch changes from Gerrit.
 - installboot: Installs a boot.img to the connected device.
 - installrecovery: Installs a recovery.img to the connected device.
+<<<<<<< HEAD
+=======
+
+Environemnt options:
+- SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
+                 ASAN_OPTIONS=detect_leaks=0 will be set by default until the
+                 build is leak-check clean.
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 Look at the source to view more functions. The complete list is:
 EOF
@@ -144,6 +154,7 @@ function setpaths()
     # defined in core/config.mk
     targetgccversion=$(get_build_var TARGET_GCC_VERSION)
     targetgccversion2=$(get_build_var 2ND_TARGET_GCC_VERSION)
+    targetlegacygccversion=$(get_build_var TARGET_LEGACY_GCC_VERSION)
     export TARGET_GCC_VERSION=$targetgccversion
 
     # The gcc toolchain does not exists for windows/cygwin. In this case, do not reference it.
@@ -179,7 +190,7 @@ function setpaths()
     case $ARCH in
         arm)
             # Legacy toolchain configuration used for ARM kernel compilation
-            toolchaindir=arm/arm-eabi-$targetgccversion/bin
+            toolchaindir=arm/arm-eabi-$targetlegacygccversion/bin
             if [ -d "$gccprebuiltdir/$toolchaindir" ]; then
                  export ARM_EABI_TOOLCHAIN="$gccprebuiltdir/$toolchaindir"
                  ANDROID_KERNEL_TOOLCHAIN_PATH="$ARM_EABI_TOOLCHAIN":
@@ -190,7 +201,7 @@ function setpaths()
             ;;
     esac
 
-    export ANDROID_DEV_SCRIPTS=$T/development/scripts:$T/prebuilts/devtools/tools
+    export ANDROID_DEV_SCRIPTS=$T/development/scripts:$T/prebuilts/devtools/tools:$T/external/selinux/prebuilts/bin
     export ANDROID_BUILD_PATHS=$(get_build_var ANDROID_BUILD_PATHS):$ANDROID_TOOLCHAIN:$ANDROID_TOOLCHAIN_2ND_ARCH:$ANDROID_KERNEL_TOOLCHAIN_PATH$ANDROID_DEV_SCRIPTS:
 
     # If prebuilts/android-emulator/<system>/ exists, prepend it to our PATH
@@ -256,6 +267,7 @@ function set_stuff_for_environment()
 
     # With this environment variable new GCC can apply colors to warnings/errors
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+    export ASAN_OPTIONS=detect_leaks=0
 }
 
 function set_sequence_number()
@@ -819,6 +831,7 @@ function m()
         $DRV make -C $T -f build/core/main.mk $@
     else
         echo "Couldn't locate the top of the tree.  Try setting TOP."
+        return 1
     fi
 }
 
@@ -857,8 +870,10 @@ function mm()
         local M=`echo $M|sed 's:'$T'/::'`
         if [ ! "$T" ]; then
             echo "Couldn't locate the top of the tree.  Try setting TOP."
+            return 1
         elif [ ! "$M" ]; then
             echo "Couldn't locate a makefile from the current directory."
+            return 1
         else
             for ARG in $@; do
                 case $ARG in
@@ -908,7 +923,7 @@ function mmm()
                 MAKEFILE="$MAKEFILE $MFILE"
             else
                 case $DIR in
-                  showcommands | snod | dist | incrementaljavac) ARGS="$ARGS $DIR";;
+                  showcommands | snod | dist | incrementaljavac | *=*) ARGS="$ARGS $DIR";;
                   GET-INSTALL-PATH) GET_INSTALL_PATH=$DIR;;
                   *) if [ -d $DIR ]; then
                          echo "No Android.mk in $DIR.";
@@ -926,6 +941,7 @@ function mmm()
         ONE_SHOT_MAKEFILE="$MAKEFILE" $DRV make -C $T -f build/core/main.mk $DASH_ARGS $MODULES $ARGS
     else
         echo "Couldn't locate the top of the tree.  Try setting TOP."
+        return 1
     fi
 }
 
@@ -938,6 +954,7 @@ function mma()
   else
     if [ ! "$T" ]; then
       echo "Couldn't locate the top of the tree.  Try setting TOP."
+      return 1
     fi
     local MY_PWD=`PWD= /bin/pwd|sed 's:'$T'/::'`
     $DRV make -C $T -f build/core/main.mk $@ all_modules BUILD_MODULES_IN_PATHS="$MY_PWD"
@@ -969,7 +986,7 @@ function mmma()
         fi
       else
         case $DIR in
-          showcommands | snod | dist | incrementaljavac) ARGS="$ARGS $DIR";;
+          showcommands | snod | dist | incrementaljavac | *=*) ARGS="$ARGS $DIR";;
           *) echo "Couldn't find directory $DIR"; return 1;;
         esac
       fi
@@ -977,6 +994,7 @@ function mmma()
     $DRV make -C $T -f build/core/main.mk $DASH_ARGS $ARGS all_modules BUILD_MODULES_IN_PATHS="$MODULE_PATHS"
   else
     echo "Couldn't locate the top of the tree.  Try setting TOP."
+    return 1
   fi
 }
 
@@ -1196,18 +1214,6 @@ function stacks()
     fi
 }
 
-function gdbwrapper()
-{
-    local GDB_CMD="$1"
-    shift 1
-    $GDB_CMD -x "$@"
-}
-
-function get_symbols_directory()
-{
-    echo $(get_abs_build_var TARGET_OUT_UNSTRIPPED)
-}
-
 # Read the ELF header from /proc/$PID/exe to determine if the process is
 # 64-bit.
 function is64bit()
@@ -1224,151 +1230,7 @@ function is64bit()
     fi
 }
 
-function adb_get_product_device() {
-  echo `adb shell getprop ro.product.device | sed s/.$//`
-}
-
-# returns 0 when process is not traced
-function adb_get_traced_by() {
-  echo `adb shell cat /proc/$1/status | grep -e "^TracerPid:" | sed "s/^TracerPid:\t//" | sed s/.$//`
-}
-
-function gdbclient() {
-  # TODO:
-  # 1. Check for ANDROID_SERIAL/multiple devices
-  local PROCESS_NAME="n/a"
-  local PID=$1
-  local PORT=5039
-  if [ -z "$PID" ]; then
-    echo "Usage: gdbclient <pid|processname> [port number]"
-    return -1
-  fi
-  local DEVICE=$(adb_get_product_device)
-
-  if [ -z "$DEVICE" ]; then
-    echo "Error: Unable to get device name. Please check if device is connected and ANDROID_SERIAL is set."
-    return -2
-  fi
-
-  if [ -n "$2" ]; then
-    PORT=$2
-  fi
-
-  local ROOT=$(gettop)
-  if [ -z "$ROOT" ]; then
-    # This is for the situation with downloaded symbols (from the build server)
-    # we check if they are available.
-    ROOT=`realpath .`
-  fi
-
-  local OUT_ROOT="$ROOT/out/target/product/$DEVICE"
-  local SYMBOLS_DIR="$OUT_ROOT/symbols"
-
-  if [ ! -d $SYMBOLS_DIR ]; then
-    echo "Error: couldn't find symbols: $SYMBOLS_DIR does not exist or is not a directory."
-    return -3
-  fi
-
-  # let's figure out which executable we are about to debug
-
-  # check if user specified a name -> resolve to pid
-  if [[ ! "$PID" =~ ^[0-9]+$ ]] ; then
-    PROCESS_NAME=$PID
-    PID=$(pid --exact $PROCESS_NAME)
-    if [ -z "$PID" ]; then
-      echo "Error: couldn't resolve pid by process name: $PROCESS_NAME"
-      return -4
-    fi
-  fi
-
-  local EXE=`adb shell readlink /proc/$PID/exe | sed s/.$//`
-  # TODO: print error in case there is no such pid
-  local LOCAL_EXE_PATH=$SYMBOLS_DIR$EXE
-
-  if [ ! -f $LOCAL_EXE_PATH ]; then
-    echo "Error: unable to find symbols for executable $EXE: file $LOCAL_EXE_PATH does not exist"
-    return -5
-  fi
-
-  local USE64BIT=""
-
-  if [[ "$(file $LOCAL_EXE_PATH)" =~ 64-bit ]]; then
-    USE64BIT="64"
-  fi
-
-  local GDB=
-  local GDB64=
-  local CPU_ABI=`adb shell getprop ro.product.cpu.abilist | sed s/.$//`
-  # TODO: we assume these are available via $PATH
-  if [[ $CPU_ABI =~ (^|,)arm64 ]]; then
-    GDB=arm-linux-androideabi-gdb
-    GDB64=aarch64-linux-android-gdb
-  elif [[ $CPU_ABI =~ (^|,)arm ]]; then
-    GDB=arm-linux-androideabi-gdb
-  elif [[ $CPU_ABI =~ (^|,)x86_64 ]]; then
-    GDB=x86_64-linux-androideabi-gdb
-  elif [[ $CPU_ABI =~ (^|,)x86 ]]; then
-    GDB=x86_64-linux-androideabi-gdb
-  elif [[ $CPU_ABI =~ (^|,)mips64 ]]; then
-    GDB=mipsel-linux-android-gdb
-    GDB64=mips64el-linux-android-gdb
-  elif [[ $CPU_ABI =~ (^|,)mips ]]; then
-    GDB=mipsel-linux-android-gdb
-  else
-    echo "Error: unrecognized cpu.abilist: $CPU_ABI"
-    return -6
-  fi
-
-  # TODO: check if tracing process is gdbserver and not some random strace...
-  if [ $(adb_get_traced_by $PID) -eq 0 ]; then
-    # start gdbserver
-    echo "Starting gdbserver..."
-    # TODO: check if adb is already listening $PORT
-    # to avoid unnecessary calls
-    echo ". adb forward for port=$PORT..."
-    adb forward tcp:$PORT tcp:$PORT
-    echo ". starting gdbserver to attach to pid=$PID..."
-    adb shell gdbserver$USE64BIT :$PORT --attach $PID &
-    echo ". give it couple of seconds to start..."
-    sleep 2
-    echo ". done"
-  else
-    echo "It looks like gdbserver is already attached to $PID (process is traced), trying to connect to it using local port=$PORT"
-  fi
-
-  local OUT_SO_SYMBOLS=$SYMBOLS_DIR/system/lib$USE64BIT
-  local OUT_VENDOR_SO_SYMBOLS=$SYMBOLS_DIR/vendor/lib$USE64BIT
-  local ART_CMD=""
-
-  echo >|"$OUT_ROOT/gdbclient.cmds" "set solib-absolute-prefix $SYMBOLS_DIR"
-  echo >>"$OUT_ROOT/gdbclient.cmds" "set solib-search-path $OUT_SO_SYMBOLS:$OUT_SO_SYMBOLS/hw:$OUT_SO_SYMBOLS/ssl/engines:$OUT_SO_SYMBOLS/drm:$OUT_SO_SYMBOLS/egl:$OUT_SO_SYMBOLS/soundfx:$OUT_VENDOR_SO_SYMBOLS:$OUT_VENDOR_SO_SYMBOLS/hw:$OUT_VENDOR_SO_SYMBOLS/egl"
-  local DALVIK_GDB_SCRIPT=$ROOT/development/scripts/gdb/dalvik.gdb
-  if [ -f $DALVIK_GDB_SCRIPT ]; then
-    echo >>"$OUT_ROOT/gdbclient.cmds" "source $DALVIK_GDB_SCRIPT"
-    ART_CMD="art-on"
-  else
-    echo "Warning: couldn't find $DALVIK_GDB_SCRIPT - ART debugging options will not be available"
-  fi
-  echo >>"$OUT_ROOT/gdbclient.cmds" "target remote :$PORT"
-  if [[ $EXE =~ (^|/)(app_process|dalvikvm)(|32|64)$ ]]; then
-    echo >> "$OUT_ROOT/gdbclient.cmds" $ART_CMD
-  fi
-
-  echo >>"$OUT_ROOT/gdbclient.cmds" ""
-
-  local WHICH_GDB=$GDB
-
-  if [ -n "$USE64BIT" -a -n "$GDB64" ]; then
-    WHICH_GDB=$GDB64
-  fi
-
-  gdbwrapper $WHICH_GDB "$OUT_ROOT/gdbclient.cmds" "$LOCAL_EXE_PATH"
-}
-
-# gdbclient now determines whether the user wants to debug a 32-bit or 64-bit
-# executable, set up the approriate gdbserver, then invokes the proper host
-# gdb.
-function gdbclient_old()
+function dddclient()
 {
    local OUT_ROOT=$(get_abs_build_var PRODUCT_OUT)
    local OUT_SYMBOLS=$(get_abs_build_var TARGET_OUT_UNSTRIPPED)
@@ -1462,11 +1324,10 @@ function gdbclient_old()
            WHICH_GDB=$ANDROID_TOOLCHAIN_2ND_ARCH/$GDB
        fi
 
-       gdbwrapper $WHICH_GDB "$OUT_ROOT/gdbclient.cmds" "$OUT_EXE_SYMBOLS/$EXE"
+       ddd --debugger $WHICH_GDB -x "$OUT_ROOT/gdbclient.cmds" "$OUT_EXE_SYMBOLS/$EXE"
   else
        echo "Unable to determine build system output dir."
    fi
-
 }
 
 function dddclient()
@@ -1603,7 +1464,7 @@ function jgrep()
 
 function cgrep()
 {
-    find . -name .repo -prune -o -name .git -prune -o -name out -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 grep --color -n "$@"
+    find . -name .repo -prune -o -name .git -prune -o -name out -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 grep --color -n "$@"
 }
 
 function resgrep()
@@ -1619,6 +1480,11 @@ function mangrep()
 function sepgrep()
 {
     find . -name .repo -prune -o -name .git -prune -o -path ./out -prune -o -name sepolicy -type d -print0 | xargs -0 grep --color -n -r --exclude-dir=\.git "$@"
+}
+
+function rcgrep()
+{
+    find . -name .repo -prune -o -name .git -prune -o -name out -prune -o -type f -name "*\.rc*" -print0 | xargs -0 grep --color -n "$@"
 }
 
 case `uname -s` in
@@ -2334,6 +2200,7 @@ function cmrebase() {
 }
 
 function mka() {
+<<<<<<< HEAD
     local T=$(gettop)
     if [ "$T" ]; then
         case `uname -s` in
@@ -2348,6 +2215,16 @@ function mka() {
     else
         echo "Couldn't locate the top of the tree.  Try setting TOP."
     fi
+=======
+    case `uname -s` in
+        Darwin)
+            make -j `sysctl hw.ncpu|cut -d" " -f2` "$@"
+            ;;
+        *)
+            mk_timer schedtool -B -n 1 -e ionice -n 1 make -j$(cat /proc/cpuinfo | grep "^processor" | wc -l) "$@"
+            ;;
+    esac
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 }
 
 function cmka() {
@@ -2380,10 +2257,17 @@ function repolastsync() {
 function reposync() {
     case `uname -s` in
         Darwin)
+<<<<<<< HEAD
             repo sync --force-sync -j 4 "$@"
             ;;
         *)
             schedtool -B -n 1 -e ionice -n 1 `which repo` sync --force-sync -j 4 "$@"
+=======
+            repo sync -j 4 "$@"
+            ;;
+        *)
+            schedtool -B -n 1 -e ionice -n 1 `which repo` sync -j 4 "$@"
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
             ;;
     esac
 }
@@ -2443,6 +2327,7 @@ function dopush()
     # Copy: <file>
     LOC="$LOC $(cat $OUT/.log | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | grep '^Copy: ' | cut -d ':' -f 2)"
 
+<<<<<<< HEAD
     # If any files are going to /data, push an octal file permissions reader to device
     if [ -n "$(echo $LOC | egrep '(^|\s)/data')" ]; then
         CHKPERM="/data/local/tmp/chkfileperm.sh"
@@ -2466,6 +2351,13 @@ EOF
         # Make sure file is in $OUT/system or $OUT/data
         case $FILE in
             $OUT/system/*|$OUT/data/*)
+=======
+    stop_n_start=false
+    for FILE in $LOC; do
+        # Make sure file is in $OUT/system
+        case $FILE in
+            $OUT/system/*)
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
                 # Get target file name (i.e. /system/bin/adb)
                 TARGET=$(echo $FILE | sed "s#$OUT##")
             ;;
@@ -2473,6 +2365,7 @@ EOF
         esac
 
         case $TARGET in
+<<<<<<< HEAD
             /data/*)
                 # fs_config only sets permissions and se labels for files pushed to /system
                 if [ -n "$CHKPERM" ]; then
@@ -2492,6 +2385,8 @@ EOF
                 fi
                 adb shell restorecon "$TARGET"
             ;;
+=======
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
             /system/priv-app/SystemUI/SystemUI.apk|/system/framework/*)
                 # Only need to stop services once
                 if ! $stop_n_start; then
@@ -2507,9 +2402,12 @@ EOF
             ;;
         esac
     done
+<<<<<<< HEAD
     if [ -n "$CHKPERM" ]; then
         adb shell rm $CHKPERM
     fi
+=======
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     if $stop_n_start; then
         adb shell start
     fi
@@ -2565,25 +2463,14 @@ function set_java_home() {
     fi
 
     if [ ! "$JAVA_HOME" ]; then
-      if [ -n "$LEGACY_USE_JAVA6" ]; then
-        case `uname -s` in
-            Darwin)
-                export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.6/Home
-                ;;
-            *)
-                export JAVA_HOME=/usr/lib/jvm/java-6-sun
-                ;;
-        esac
-      else
-        case `uname -s` in
-            Darwin)
-                export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)
-                ;;
-            *)
-                export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-                ;;
-        esac
-      fi
+      case `uname -s` in
+          Darwin)
+              export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)
+              ;;
+          *)
+              export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+              ;;
+      esac
 
       # Keep track of the fact that we set JAVA_HOME ourselves, so that
       # we can change it on the next envsetup.sh, if required.
@@ -2597,9 +2484,9 @@ function pez {
     local retval=$?
     if [ $retval -ne 0 ]
     then
-        echo -e "\e[0;31mFAILURE\e[00m"
+        printf "\e[0;31mFAILURE\e[00m\n"
     else
-        echo -e "\e[0;32mSUCCESS\e[00m"
+        printf "\e[0;32mSUCCESS\e[00m\n"
     fi
     return $retval
 }
@@ -2619,11 +2506,21 @@ function mk_timer()
     local hours=$(($tdiff / 3600 ))
     local mins=$((($tdiff % 3600) / 60))
     local secs=$(($tdiff % 60))
+    local ncolors=$(tput colors 2>/dev/null)
+    if [ -n "$ncolors" ] && [ $ncolors -ge 8 ]; then
+        color_failed="\e[0;31m"
+        color_success="\e[0;32m"
+        color_reset="\e[0m"
+    else
+        color_failed=""
+        color_success=""
+        color_reset=""
+    fi
     echo
     if [ $ret -eq 0 ] ; then
-        echo -n -e "#### make completed successfully "
+        printf "${color_success}#### make completed successfully "
     else
-        echo -n -e "#### make failed to build some targets "
+        printf "${color_failed}#### make failed to build some targets "
     fi
     if [ $hours -gt 0 ] ; then
         printf "(%02g:%02g:%02g (hh:mm:ss))" $hours $mins $secs
@@ -2632,8 +2529,7 @@ function mk_timer()
     elif [ $secs -gt 0 ] ; then
         printf "(%s seconds)" $secs
     fi
-    echo -e " ####"
-    echo
+    printf " ####${color_reset}\n\n"
     return $ret
 }
 
@@ -2641,8 +2537,11 @@ function make()
 {
     mk_timer $(get_make_command) "$@"
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
     case `ps -o command -p $$` in
@@ -2657,8 +2556,8 @@ if [ "x$SHELL" != "x/bin/bash" ]; then
 fi
 
 # Execute the contents of any vendorsetup.sh files we can find.
-for f in `test -d device && find -L device -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null` \
-         `test -d vendor && find -L vendor -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null`
+for f in `test -d device && find -L device -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null | sort` \
+         `test -d vendor && find -L vendor -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null | sort`
 do
     echo "including $f"
     . $f

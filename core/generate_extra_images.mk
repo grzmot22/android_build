@@ -99,23 +99,36 @@ DTBTOOL := $(HOST_OUT_EXECUTABLES)/$(DTBTOOL_NAME)$(HOST_EXECUTABLE_SUFFIX)
 
 INSTALLED_DTIMAGE_TARGET := $(PRODUCT_OUT)/dt.img
 
+<<<<<<< HEAD
 possible_dtb_dirs = $(KERNEL_OUT)/arch/$(TARGET_KERNEL_ARCH)/boot/dts/ $(KERNEL_OUT)/arch/arm/boot/
 dtb_dir = $(firstword $(wildcard $(possible_dtb_dirs)))
 
 define build-dtimage-target
     $(call pretty,"Target dt image: $(INSTALLED_DTIMAGE_TARGET)")
     $(hide) $(DTBTOOL) $(BOARD_DTBTOOL_ARGS) -o $@ -s $(BOARD_KERNEL_PAGESIZE) -p $(KERNEL_OUT)/scripts/dtc/ $(dtb_dir)
+=======
+define build-dtimage-target
+    $(call pretty,"Target dt image: $(INSTALLED_DTIMAGE_TARGET)")
+    $(hide) $(DTBTOOL) -o $@ -s $(BOARD_KERNEL_PAGESIZE) -p $(KERNEL_OUT)/scripts/dtc/ $(KERNEL_OUT)/arch/arm/boot/
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     $(hide) chmod a+r $@
 endef
 
 $(INSTALLED_DTIMAGE_TARGET): $(DTBTOOL) $(INSTALLED_KERNEL_TARGET)
 	$(build-dtimage-target)
+<<<<<<< HEAD
 	@echo -e ${CL_CYN}"Made DT image: $@"${CL_RST}
+=======
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 
 ALL_DEFAULT_INSTALLED_MODULES += $(INSTALLED_DTIMAGE_TARGET)
 ALL_MODULES.$(LOCAL_MODULE).INSTALLED += $(INSTALLED_DTIMAGE_TARGET)
 endif
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
 #----------------------------------------------------------------------
 # Generate 1GB userdata image for 8930
 #----------------------------------------------------------------------

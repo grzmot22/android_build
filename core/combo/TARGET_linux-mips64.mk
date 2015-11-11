@@ -18,7 +18,7 @@
 # Included by combo/select.mk
 
 # You can set TARGET_ARCH_VARIANT to use an arch version other
-# than mips64. Each value should correspond to a file named
+# than mips64r6. Each value should correspond to a file named
 # $(BUILD_COMBOS)/arch/<name>.mk which must contain
 # makefile variable definitions similar to the preprocessor
 # defines in build/core/combo/include/arch/<combo>/AndroidConfig.h. Their
@@ -35,7 +35,7 @@ TARGET_ARCH_VARIANT := mips64r6
 endif
 
 # Decouple NDK library selection with platform compiler version
-TARGET_NDK_GCC_VERSION := 4.8
+TARGET_NDK_GCC_VERSION := 4.9
 
 ifeq ($(strip $(TARGET_GCC_VERSION_EXP)),)
 TARGET_GCC_VERSION := 4.9
@@ -96,6 +96,12 @@ TARGET_GLOBAL_CFLAGS += \
 			-include $(android_config_h) \
 			-I $(dir $(android_config_h))
 
+# Help catch common 32/64-bit errors.
+TARGET_GLOBAL_CFLAGS += \
+    -Werror=pointer-to-int-cast \
+    -Werror=int-to-pointer-cast \
+    -Werror=implicit-function-declaration \
+
 ifneq ($(ARCH_MIPS_PAGE_SHIFT),)
 TARGET_GLOBAL_CFLAGS += -DPAGE_SHIFT=$(ARCH_MIPS_PAGE_SHIFT)
 endif
@@ -104,6 +110,7 @@ TARGET_GLOBAL_LDFLAGS += \
 			-Wl,-z,noexecstack \
 			-Wl,-z,relro \
 			-Wl,-z,now \
+			-Wl,--build-id=md5 \
 			-Wl,--warn-shared-textrel \
 			-Wl,--fatal-warnings \
 			$(arch_variant_ldflags)
@@ -125,7 +132,6 @@ TARGET_RELEASE_CFLAGS := \
 
 libc_root := bionic/libc
 libm_root := bionic/libm
-libstdc++_root := bionic/libstdc++
 libthread_db_root := bionic/libthread_db
 
 
@@ -142,6 +148,8 @@ LIBGCC_EH := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-file-name=libgc
 ifneq ($(LIBGCC_EH),libgcc_eh.a)
   TARGET_LIBGCC += $(LIBGCC_EH)
 endif
+TARGET_LIBGCOV := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) \
+        --print-file-name=libgcov.a)
 endif
 
 KERNEL_HEADERS_COMMON := $(libc_root)/kernel/uapi
@@ -152,7 +160,6 @@ KERNEL_HEADERS := $(KERNEL_HEADERS_COMMON) $(KERNEL_HEADERS_ARCH)
 TARGET_C_INCLUDES := \
 	$(libc_root)/arch-mips64/include \
 	$(libc_root)/include \
-	$(libstdc++_root)/include \
 	$(KERNEL_HEADERS) \
 	$(libm_root)/include \
 	$(libm_root)/include/mips \
@@ -166,10 +173,11 @@ TARGET_CRTEND_O := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtend_android.o
 TARGET_CRTBEGIN_SO_O := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_so.o
 TARGET_CRTEND_SO_O := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtend_so.o
 
-TARGET_STRIP_MODULE:=true
+TARGET_PACK_MODULE_RELOCATIONS := true
 
 TARGET_DEFAULT_SYSTEM_SHARED_LIBRARIES := libc libstdc++ libm
 
+<<<<<<< HEAD
 TARGET_CUSTOM_LD_COMMAND := true
 
 define transform-o-to-shared-lib-inner
@@ -245,3 +253,6 @@ $(hide) $(PRIVATE_CXX) -nostdlib -Bstatic \
 	-Wl,--end-group \
 	$(if $(filter true,$(PRIVATE_NO_CRT)),,$(PRIVATE_TARGET_CRTEND_O))
 endef
+=======
+TARGET_LINKER := /system/bin/linker64
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58

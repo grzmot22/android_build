@@ -23,10 +23,10 @@ TARGET_$(combo_2nd_arch_prefix)ARCH_VARIANT := x86
 endif
 
 # Decouple NDK library selection with platform compiler version
-$(combo_2nd_arch_prefix)TARGET_NDK_GCC_VERSION := 4.8
+$(combo_2nd_arch_prefix)TARGET_NDK_GCC_VERSION := 4.9
 
 ifeq ($(strip $(TARGET_GCC_VERSION_EXP)),)
-$(combo_2nd_arch_prefix)TARGET_GCC_VERSION := 4.8
+$(combo_2nd_arch_prefix)TARGET_GCC_VERSION := 4.9
 else
 $(combo_2nd_arch_prefix)TARGET_GCC_VERSION := $(TARGET_GCC_VERSION_EXP)
 endif
@@ -62,13 +62,14 @@ $(combo_2nd_arch_prefix)TARGET_LIBGCC := \
 	$(shell $($(combo_2nd_arch_prefix)TARGET_CC) -m32 -print-file-name=libgcc.a)
 $(combo_2nd_arch_prefix)TARGET_LIBATOMIC := \
 	$(shell $($(combo_2nd_arch_prefix)TARGET_CC) -m32 -print-file-name=libatomic.a)
+$(combo_2nd_arch_prefix)TARGET_LIBGCOV := \
+	$(shell $($(combo_2nd_arch_prefix)TARGET_CC) -m32 -print-file-name=libgcov.a)
 endif
 
 $(combo_2nd_arch_prefix)TARGET_NO_UNDEFINED_LDFLAGS := -Wl,--no-undefined
 
 libc_root := bionic/libc
 libm_root := bionic/libm
-libstdc++_root := bionic/libstdc++
 
 KERNEL_HEADERS_COMMON := $(libc_root)/kernel/uapi
 KERNEL_HEADERS_ARCH   := $(libc_root)/kernel/uapi/asm-x86 # x86 covers both x86 and x86_64.
@@ -121,9 +122,11 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -m32
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,-z,noexecstack
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,-z,relro -Wl,-z,now
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,--build-id=md5
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,--warn-shared-textrel
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,--fatal-warnings
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,--gc-sections
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += -Wl,--hash-style=gnu
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += $(BOARD_GLOBAL_CFLAGS)
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += $(BOARD_GLOBAL_CPPFLAGS)
@@ -132,7 +135,6 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += $(BOARD_GLOBAL_LDFLAGS)
 $(combo_2nd_arch_prefix)TARGET_C_INCLUDES := \
 	$(libc_root)/arch-x86/include \
 	$(libc_root)/include \
-	$(libstdc++_root)/include \
 	$(KERNEL_HEADERS) \
 	$(libm_root)/include \
 	$(libm_root)/include/i387 \
@@ -144,6 +146,7 @@ $(combo_2nd_arch_prefix)TARGET_CRTEND_O := $($(combo_2nd_arch_prefix)TARGET_OUT_
 $(combo_2nd_arch_prefix)TARGET_CRTBEGIN_SO_O := $($(combo_2nd_arch_prefix)TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_so.o
 $(combo_2nd_arch_prefix)TARGET_CRTEND_SO_O := $($(combo_2nd_arch_prefix)TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtend_so.o
 
+<<<<<<< HEAD
 $(combo_2nd_arch_prefix)TARGET_STRIP_MODULE:=true
 
 $(combo_2nd_arch_prefix)TARGET_DEFAULT_SYSTEM_SHARED_LIBRARIES := libc libstdc++ libm
@@ -218,3 +221,12 @@ $(hide) $(PRIVATE_CXX) \
 	-Wl,--end-group \
 	$(if $(filter true,$(PRIVATE_NO_CRT)),,$(PRIVATE_TARGET_CRTEND_O))
 endef
+=======
+$(combo_2nd_arch_prefix)TARGET_PACK_MODULE_RELOCATIONS := true
+
+$(combo_2nd_arch_prefix)TARGET_DEFAULT_SYSTEM_SHARED_LIBRARIES := libc libm
+
+$(combo_2nd_arch_prefix)TARGET_LINKER := /system/bin/linker
+
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_YASM_FLAGS := -f elf32 -m x86
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58

@@ -207,7 +207,10 @@ if __name__ == '__main__':
     projects = xml_root.findall('project')
     default_revision = xml_root.findall('default')[0].get('revision').split('/')[-1]
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     #dump project data into the a list of dicts with the following data:
     #{project: {path, revision}}
 
@@ -217,6 +220,10 @@ if __name__ == '__main__':
         revision = project.get('revision')
         if revision is None:
             revision = default_revision
+<<<<<<< HEAD
+=======
+
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
         if not name in project_name_to_data:
             project_name_to_data[name] = {}
         project_name_to_data[name][revision] = path
@@ -327,6 +334,10 @@ if __name__ == '__main__':
                     print('Fetching from GitHub didn\'t work, trying to fetch the change from Gerrit')
                 else:
                     print('Fetching from {0}'.format(args.gerrit))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
             if args.pull:
                 cmd = ['git pull --no-edit', item['fetch'][method]['url'], item['fetch'][method]['ref']]
             else:

@@ -30,15 +30,8 @@ if sys.hexversion < 0x02070000:
 
 import errno
 import os
-import re
-import shutil
-import subprocess
 import tempfile
 import zipfile
-
-# missing in Python 2.4 and before
-if not hasattr(os, "SEEK_SET"):
-  os.SEEK_SET = 0
 
 import build_image
 import common
@@ -58,22 +51,20 @@ def AddSystem(output_zip, prefix="IMAGES/", recovery_img=None, boot_img=None):
     return
 
   def output_sink(fn, data):
-     ofile = open(os.path.join(OPTIONS.input_tmp,"SYSTEM",fn), "w")
-     ofile.write(data)
-     ofile.close()
+    ofile = open(os.path.join(OPTIONS.input_tmp, "SYSTEM", fn), "w")
+    ofile.write(data)
+    ofile.close()
 
   if OPTIONS.rebuild_recovery:
-    print("Building new recovery patch")
-    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink, recovery_img, boot_img,
-                             info_dict=OPTIONS.info_dict)
+    print "Building new recovery patch"
+    common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink, recovery_img,
+                             boot_img, info_dict=OPTIONS.info_dict)
 
   block_list = common.MakeTempFile(prefix="system-blocklist-", suffix=".map")
   imgname = BuildSystem(OPTIONS.input_tmp, OPTIONS.info_dict,
                         block_list=block_list)
-  with open(imgname, "rb") as f:
-    common.ZipWriteStr(output_zip, prefix + "system.img", f.read())
-  with open(block_list, "rb") as f:
-    common.ZipWriteStr(output_zip, prefix + "system.map", f.read())
+  common.ZipWrite(output_zip, imgname, prefix + "system.img")
+  common.ZipWrite(output_zip, block_list, prefix + "system.map")
 
 
 def BuildSystem(input_dir, info_dict, block_list=None):
@@ -93,11 +84,9 @@ def AddVendor(output_zip, prefix="IMAGES/"):
 
   block_list = common.MakeTempFile(prefix="vendor-blocklist-", suffix=".map")
   imgname = BuildVendor(OPTIONS.input_tmp, OPTIONS.info_dict,
-                     block_list=block_list)
-  with open(imgname, "rb") as f:
-    common.ZipWriteStr(output_zip, prefix + "vendor.img", f.read())
-  with open(block_list, "rb") as f:
-    common.ZipWriteStr(output_zip, prefix + "vendor.map", f.read())
+                        block_list=block_list)
+  common.ZipWrite(output_zip, imgname, prefix + "vendor.img")
+  common.ZipWrite(output_zip, block_list, prefix + "vendor.map")
 
 
 def BuildVendor(input_dir, info_dict, block_list=None):
@@ -140,18 +129,18 @@ def CreateImage(input_dir, info_dict, what, block_list=None):
   try:
     os.symlink(os.path.join(input_dir, what.upper()),
                os.path.join(input_dir, what))
-  except OSError, e:
-      # bogus error on my mac version?
-      #   File "./build/tools/releasetools/img_from_target_files", line 86, in AddSystem
-      #     os.path.join(OPTIONS.input_tmp, "system"))
-      # OSError: [Errno 17] File exists
-    if (e.errno == errno.EEXIST):
+  except OSError as e:
+    # bogus error on my mac version?
+    #   File "./build/tools/releasetools/img_from_target_files"
+    #     os.path.join(OPTIONS.input_tmp, "system"))
+    # OSError: [Errno 17] File exists
+    if e.errno == errno.EEXIST:
       pass
 
   image_props = build_image.ImagePropFromGlobalDict(info_dict, what)
   fstab = info_dict["fstab"]
   if fstab:
-    image_props["fs_type" ] = fstab["/" + what].fs_type
+    image_props["fs_type"] = fstab["/" + what].fs_type
 
   if what == "system":
     fs_config_prefix = ""
@@ -160,16 +149,27 @@ def CreateImage(input_dir, info_dict, what, block_list=None):
 
   fs_config = os.path.join(
       input_dir, "META/" + fs_config_prefix + "filesystem_config.txt")
-  if not os.path.exists(fs_config): fs_config = None
+  if not os.path.exists(fs_config):
+    fs_config = None
 
   fc_config = os.path.join(input_dir, "BOOT/RAMDISK/file_contexts")
-  if not os.path.exists(fc_config): fc_config = None
+  if not os.path.exists(fc_config):
+    fc_config = None
+
+  # Override values loaded from info_dict.
+  if fs_config:
+    image_props["fs_config"] = fs_config
+  if fc_config:
+    image_props["selinux_fc"] = fc_config
+  if block_list:
+    image_props["block_list"] = block_list
+  if image_props.get("system_root_image") == "true":
+    image_props["ramdisk_dir"] = os.path.join(input_dir, "BOOT/RAMDISK")
+    image_props["ramdisk_fs_config"] = os.path.join(
+        input_dir, "META/boot_filesystem_config.txt")
 
   succ = build_image.BuildImage(os.path.join(input_dir, what),
-                                image_props, img,
-                                fs_config=fs_config,
-                                fc_config=fc_config,
-                                block_list=block_list)
+                                image_props, img)
   assert succ, "build " + what + ".img image failed"
 
   return img
@@ -203,12 +203,48 @@ def AddUserdata(output_zip, prefix="IMAGES/"):
 
   fstab = OPTIONS.info_dict["fstab"]
   if fstab:
-    image_props["fs_type" ] = fstab["/data"].fs_type
+    image_props["fs_type"] = fstab["/data"].fs_type
   succ = build_image.BuildImage(user_dir, image_props, img.name)
   assert succ, "build userdata.img image failed"
 
   common.CheckSize(img.name, "userdata.img", OPTIONS.info_dict)
-  output_zip.write(img.name, prefix + "userdata.img")
+  common.ZipWrite(output_zip, img.name, prefix + "userdata.img")
+  img.close()
+  os.rmdir(user_dir)
+  os.rmdir(temp_dir)
+
+
+def AddUserdataExtra(output_zip):
+  """Create extra userdata image and store it in output_zip."""
+
+  image_props = build_image.ImagePropFromGlobalDict(OPTIONS.info_dict,
+                                                  "data_extra")
+  # If no userdataextra_size is provided for extfs, skip userdata_extra.img.
+  if (image_props.get("fs_type", "").startswith("ext") and
+      not image_props.get("partition_size")):
+    return
+
+  extra_name = image_props.get("partition_name", "extra")
+
+  print "creating userdata_%s.img..." % extra_name
+
+  # The name of the directory it is making an image out of matters to
+  # mkyaffs2image.  So we create a temp dir, and within it we create an
+  # empty dir named "data", and build the image from that.
+  temp_dir = tempfile.mkdtemp()
+  user_dir = os.path.join(temp_dir, "data")
+  os.mkdir(user_dir)
+  img = tempfile.NamedTemporaryFile()
+
+  fstab = OPTIONS.info_dict["fstab"]
+  if fstab:
+    image_props["fs_type" ] = fstab["/data"].fs_type
+  succ = build_image.BuildImage(user_dir, image_props, img.name)
+  assert succ, "build userdata_%s.img image failed" % extra_name
+
+  # Disable size check since this fetches original data partition size
+  #common.CheckSize(img.name, "userdata_extra.img", OPTIONS.info_dict)
+  output_zip.write(img.name, "userdata_%s.img" % extra_name)
   img.close()
   os.rmdir(user_dir)
   os.rmdir(temp_dir)
@@ -287,12 +323,12 @@ def AddCache(output_zip, prefix="IMAGES/"):
 
   fstab = OPTIONS.info_dict["fstab"]
   if fstab:
-    image_props["fs_type" ] = fstab["/cache"].fs_type
+    image_props["fs_type"] = fstab["/cache"].fs_type
   succ = build_image.BuildImage(user_dir, image_props, img.name)
   assert succ, "build cache.img image failed"
 
   common.CheckSize(img.name, "cache.img", OPTIONS.info_dict)
-  output_zip.write(img.name, prefix + "cache.img")
+  common.ZipWrite(output_zip, img.name, prefix + "cache.img")
   img.close()
   os.rmdir(user_dir)
   os.rmdir(temp_dir)
@@ -324,7 +360,7 @@ def AddImagesToTargetFiles(filename):
     OPTIONS.info_dict["selinux_fc"] = os.path.join(
         OPTIONS.input_tmp, "BOOT", "RAMDISK", "file_contexts")
 
-  input_zip.close()
+  common.ZipClose(input_zip)
   output_zip = zipfile.ZipFile(filename, "a",
                                compression=zipfile.ZIP_DEFLATED)
 
@@ -375,11 +411,10 @@ def AddImagesToTargetFiles(filename):
     AddOem(output_zip)
 
 
-  output_zip.close()
+  common.ZipClose(output_zip)
 
 def main(argv):
-
-  def option_handler(o, a):
+  def option_handler(o, _):
     if o in ("-a", "--add_missing"):
       OPTIONS.add_missing = True
     elif o in ("-r", "--rebuild_recovery",):
@@ -388,12 +423,10 @@ def main(argv):
       return False
     return True
 
-  args = common.ParseOptions(argv, __doc__,
-                             extra_opts="ar",
-                             extra_long_opts=["add_missing",
-                                              "rebuild_recovery",
-                                              ],
-                             extra_option_handler=option_handler)
+  args = common.ParseOptions(
+      argv, __doc__, extra_opts="ar",
+      extra_long_opts=["add_missing", "rebuild_recovery"],
+      extra_option_handler=option_handler)
 
 
   if len(args) != 1:
@@ -407,7 +440,7 @@ if __name__ == '__main__':
   try:
     common.CloseInheritedPipes()
     main(sys.argv[1:])
-  except common.ExternalError, e:
+  except common.ExternalError as e:
     print
     print "   ERROR: %s" % (e,)
     print

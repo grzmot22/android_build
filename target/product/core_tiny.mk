@@ -54,6 +54,10 @@ PRODUCT_PACKAGES += \
     ip-up-vpn \
     ip6tables \
     iptables \
+<<<<<<< HEAD
+=======
+    gatekeeperd \
+>>>>>>> 71cd45a4fbee7eb650a523e4ad3c6eac4ef3ee58
     javax.btobex \
     keystore \
     keystore.default \
@@ -61,6 +65,7 @@ PRODUCT_PACKAGES += \
     libOpenSLES \
     libdownmix \
     libfilterfw \
+    libgatekeeper \
     libkeystore \
     libsqlite_jni \
     libwilhelm \
@@ -77,7 +82,6 @@ PRODUCT_PACKAGES += \
     telephony-common \
     voip-common \
     logd \
-    mms-common \
     wifi-service
 
 # The order matters
@@ -92,17 +96,14 @@ PRODUCT_BOOT_JARS := \
     telephony-common \
     voip-common \
     ims-common \
-    mms-common \
-    android.policy \
     apache-xml \
     nullwebview \
+    org.apache.http.legacy.boot
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
 PRODUCT_SYSTEM_SERVER_JARS := \
     services \
     wifi-service
-
-PRODUCT_RUNTIMES := runtime_libart_default
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.zygote=zygote32
@@ -112,8 +113,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.carrier=unknown
 
+$(call inherit-product, $(SRC_TARGET_DIR)/product/runtime_libart.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 $(call inherit-product-if-exists, frameworks/base/data/fonts/fonts.mk)
+$(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
 
 # Overrides
 PRODUCT_BRAND := tiny
