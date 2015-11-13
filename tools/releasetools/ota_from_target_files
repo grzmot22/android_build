@@ -586,6 +586,11 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   # script.Print("Lead Developer: AntaresOne")
   script.Print(" ")
   script.AppendExtra("sleep (2);")
+  script.Print("***Warning***")
+  script.Print("If you use OpenGApps do not forget to reinstall its package")
+  script.Print("after ROM update, otherwise Play Services will crash.")
+  script.Print(" ")
+  script.AppendExtra("sleep (2);")
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
