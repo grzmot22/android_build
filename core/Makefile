@@ -1161,6 +1161,9 @@ FULL_SYSTEMIMAGE_DEPS := $(INTERNAL_SYSTEMIMAGE_FILES) $(INTERNAL_USERIMAGES_DEP
 # system image.
 INSTALLED_FILES_FILE := $(PRODUCT_OUT)/installed-files.txt
 $(INSTALLED_FILES_FILE): $(FULL_SYSTEMIMAGE_DEPS)
+	@echo -e ${CL_GRN}"Generating Changelog"${CL_RST}
+	$(hide) ./vendor/cm/tools/changelog.sh
+	$(hide) mv $(PRODUCT_OUT)/Changelog.txt $(PRODUCT_OUT)/$(TARGET_PRODUCT)-Changelog.txt
 	@echo Installed file list: $@
 	@mkdir -p $(dir $@)
 	@rm -f $@
@@ -1904,7 +1907,12 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-CM_TARGET_PACKAGE := $(PRODUCT_OUT)/cm-$(CM_VERSION).zip
+ifeq ($(TARGET_UNOFFICIAL_BUILD_ID),temasek)
+      TEMASEK_VERSION := $(shell grep temasek_version_default ./packages/apps/Settings/res/values/cr_strings.xml | cut -dV -f2 | cut -d"<" -f1)
+    CM_TARGET_PACKAGE := $(PRODUCT_OUT)/cm-$(CM_VERSION)-V$(TEMASEK_VERSION).zip
+else
+    CM_TARGET_PACKAGE := $(PRODUCT_OUT)/cm-$(CM_VERSION).zip
+endif
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
@@ -1912,7 +1920,7 @@ bacon: otapackage
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(CM_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(CM_TARGET_PACKAGE) > $(CM_TARGET_PACKAGE).md5sum
 	@echo -e ${CL_CYN}"Package Complete: $(CM_TARGET_PACKAGE)"${CL_RST}
-
+ 
 # -----------------------------------------------------------------
 # The factory package
 

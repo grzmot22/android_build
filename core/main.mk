@@ -197,7 +197,7 @@ $(info ************************************************************)
 $(info You asked for an OpenJDK 7 build but your version is)
 $(info $(java_version_str).)
 $(info ************************************************************)
-$(error stop)
+$(info You may continue but you are warned!)
 endif # java version is not OpenJdk
 else # if requires_openjdk
 ifneq ($(shell echo '$(java_version_str)' | grep -i openjdk),)
@@ -208,8 +208,8 @@ $(info You use OpenJDK but only Oracle JDK is supported.)
 $(info Please follow the machine setup instructions at)
 $(info $(space)$(space)$(space)$(space)https://source.android.com/source/download.html)
 $(info ************************************************************)
-$(error stop)
-endif # java version is not Oracle JDK
+$(info You may continue but you are warned!)
+endif # java version is not Sun Oracle JDK
 endif # if requires_openjdk
 
 # Check for the correct version of javac
@@ -224,7 +224,7 @@ $(info $(space))
 $(info Please follow the machine setup instructions at)
 $(info $(space)$(space)$(space)$(space)https://source.android.com/source/download.html)
 $(info ************************************************************)
-$(error stop)
+$(info You may continue but you are warned!)
 endif
 
 
