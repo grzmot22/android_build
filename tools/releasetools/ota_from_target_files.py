@@ -745,15 +745,15 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra('delete_recursive("/system/supersu");')
 # Install ViPER|Atmos Dark 
   script.Print("Extracting ViPER|Atmos Dark...");
-  script.AppendExtra('package_extract_dir("system/V4A", "/tmp/V4A");')
-  script.AppendExtra('run_program("/sbin/busybox", "unzip", "/tmp/V4A/ViPERAtmos_Dark.zip", "META-INF/com/google/android/update-binary", "-d", "/tmp/V4A");')
+  script.AppendExtra('package_extract_dir("system/v4a", "/tmp/v4a");')
+  script.AppendExtra('run_program("/sbin/busybox", "unzip", "/tmp/v4a/v4a.zip", "META-INF/com/google/android/update-binary", "-d", "/tmp/v4a");')
   script.Print("Installing ViPER|Atmos Dark...");
-  script.AppendExtra('run_program("/sbin/busybox", "sh", "/tmp/supersu/META-INF/com/google/android/update-binary", "null", "1", "/tmp/V4A/ViPERAtmos_Dark.zip");')
+  script.AppendExtra('run_program("/sbin/busybox", "sh", "/tmp/supersu/META-INF/com/google/android/update-binary", "null", "1", "/tmp/v4a/v4a.zip");')
 
   script.Print("Cleaning up...");
   script.Mount("/system")
-  script.AppendExtra('delete_recursive("/tmp/V4A");')
-  script.AppendExtra('delete_recursive("/system/V4A");')
+  script.AppendExtra('delete_recursive("/tmp/v4a");')
+  script.AppendExtra('delete_recursive("/system/v4a");')
   script.Unmount("/system");
   script.UnmountAll()
   script.Print("Installation complete!");
