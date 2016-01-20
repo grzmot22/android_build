@@ -187,6 +187,7 @@ ifeq ($(HOST_OS), linux)
 requires_openjdk := false
 endif
 endif
+endif
 
 # Check for the current jdk
 ifeq ($(requires_openjdk), true)

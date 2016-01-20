@@ -618,7 +618,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.Print(" / // / // / /__  / / / -_) _ `/  ' \ ")
   script.Print(" \___/____/\___/ /_/  \__/\_,_/_/_/_/ ")
   script.Print(" ")
-  script.Print("Optimized CyanogenMod 13 builds")
+  script.Print("Optimized CyanogenMod 13")
   script.Print(" ")
   script.AppendExtra("sleep (2);")
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
@@ -685,6 +685,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     common.MakeRecoveryPatch(OPTIONS.input_tmp, output_sink,
                              recovery_img, boot_img)
 
+    script.Print("Setting permissions...");
     system_items.GetMetadata(input_zip)
     system_items.Get("system").SetPermissions(script)
 
