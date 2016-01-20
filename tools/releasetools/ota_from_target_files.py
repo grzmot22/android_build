@@ -748,7 +748,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   script.AppendExtra('package_extract_dir("system/v4a", "/tmp/v4a");')
   script.AppendExtra('run_program("/sbin/busybox", "unzip", "/tmp/v4a/v4a.zip", "META-INF/com/google/android/update-binary", "-d", "/tmp/v4a");')
   script.Print("Installing ViPER|Atmos Dark...");
-  script.AppendExtra('run_program("/sbin/busybox", "sh", "/tmp/supersu/META-INF/com/google/android/update-binary", "null", "1", "/tmp/v4a/v4a.zip");')
+  script.AppendExtra('run_program("/sbin/busybox", "sh", "/tmp/v4a/META-INF/com/google/android/update-binary", "null", "1", "/tmp/v4a/v4a.zip");')
 
   script.Print("Cleaning up...");
   script.Mount("/system")
