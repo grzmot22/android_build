@@ -238,7 +238,7 @@ $(shell echo 'VERSIONS_CHECKED := $(VERSION_CHECK_SEQUENCE_NUMBER)' \
         > $(OUT_DIR)/versions_checked.mk)
 $(shell echo 'BUILD_EMULATOR ?= $(BUILD_EMULATOR)' \
         >> $(OUT_DIR)/versions_checked.mk)
-endif
+
 
 # These are the modifier targets that don't do anything themselves, but
 # change the behavior of the build.
