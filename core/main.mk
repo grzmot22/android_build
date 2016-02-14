@@ -188,6 +188,7 @@ requires_openjdk := false
 endif
 endif
 endif
+endif
 
 # Check for the current jdk
 ifeq ($(requires_openjdk), true)
