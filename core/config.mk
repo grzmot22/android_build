@@ -401,6 +401,45 @@ endif
 endif
 endif
 
+#
+# Tools that are prebuilts for TARGET_BUILD_APPS
+#
+
+ACP := $(HOST_OUT_EXECUTABLES)/acp
+AIDL := $(HOST_OUT_EXECUTABLES)/aidl
+AAPT := $(HOST_OUT_EXECUTABLES)/aapt
+ZIPALIGN := $(HOST_OUT_EXECUTABLES)/zipalign
+SIGNAPK_JAR := $(HOST_OUT_JAVA_LIBRARIES)/signapk$(COMMON_JAVA_PACKAGE_SUFFIX)
+SIGNAPK_JNI_LIBRARY_PATH := $(HOST_OUT_SHARED_LIBRARIES)
+LLVM_RS_CC := $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+BCC_COMPAT := $(HOST_OUT_EXECUTABLES)/bcc_compat
+
+DX := $(HOST_OUT_EXECUTABLES)/dx
+MAINDEXCLASSES := $(HOST_OUT_EXECUTABLES)/mainDexClasses
+
+# Override the definitions above for unbundled and PDK builds
+ifneq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+prebuilt_sdk_tools := prebuilts/sdk/tools
+prebuilt_sdk_tools_bin := $(prebuilt_sdk_tools)/$(HOST_OS)/bin
+
+ACP := $(prebuilt_sdk_tools_bin)/acp
+AIDL := $(prebuilt_sdk_tools_bin)/aidl
+AAPT := $(prebuilt_sdk_tools_bin)/aapt
+ZIPALIGN := $(prebuilt_sdk_tools_bin)/zipalign
+SIGNAPK_JAR := $(prebuilt_sdk_tools)/lib/signapk$(COMMON_JAVA_PACKAGE_SUFFIX)
+# Use 64-bit libraries unconditionally because 32-bit JVMs are no longer supported
+SIGNAPK_JNI_LIBRARY_PATH := $(prebuilt_sdk_tools)/$(HOST_OS)/lib64
+
+DX := $(prebuilt_sdk_tools)/dx
+MAINDEXCLASSES := $(prebuilt_sdk_tools)/mainDexClasses
+
+# Don't use prebuilts in PDK
+ifneq ($(TARGET_BUILD_PDK),true)
+LLVM_RS_CC := $(prebuilt_sdk_tools_bin)/llvm-rs-cc
+BCC_COMPAT := $(prebuilt_sdk_tools_bin)/bcc_compat
+endif # TARGET_BUILD_PDK
+endif # TARGET_BUILD_APPS || TARGET_BUILD_PDK
+
 
 # ---------------------------------------------------------------
 # Generic tools.
@@ -422,10 +461,7 @@ YACC := $(BISON) -d
 YASM := prebuilts/misc/$(BUILD_OS)-$(HOST_PREBUILT_ARCH)/yasm/yasm
 
 DOXYGEN:= doxygen
-AAPT := $(HOST_OUT_EXECUTABLES)/aapt$(HOST_EXECUTABLE_SUFFIX)
-AIDL := $(HOST_OUT_EXECUTABLES)/aidl$(HOST_EXECUTABLE_SUFFIX)
 PROTOC := $(HOST_OUT_EXECUTABLES)/aprotoc$(HOST_EXECUTABLE_SUFFIX)
-SIGNAPK_JAR := $(HOST_OUT_JAVA_LIBRARIES)/signapk$(COMMON_JAVA_PACKAGE_SUFFIX)
 MKBOOTFS := $(HOST_OUT_EXECUTABLES)/mkbootfs$(HOST_EXECUTABLE_SUFFIX)
 MINIGZIP := $(HOST_OUT_EXECUTABLES)/minigzip$(HOST_EXECUTABLE_SUFFIX)
 ifeq (,$(strip $(BOARD_CUSTOM_MKBOOTIMG)))
@@ -493,8 +529,6 @@ DEFAULT_JACK_EXTRA_ARGS += --verbose error
 JILL := java -Xmx3500m -jar $(JILL_JAR)
 PROGUARD := external/proguard/bin/proguard.sh
 JAVATAGS := build/tools/java-event-log-tags.py
-LLVM_RS_CC := $(HOST_OUT_EXECUTABLES)/llvm-rs-cc$(HOST_EXECUTABLE_SUFFIX)
-BCC_COMPAT := $(HOST_OUT_EXECUTABLES)/bcc_compat$(HOST_EXECUTABLE_SUFFIX)
 LINT := prebuilts/sdk/tools/lint
 RMTYPEDEFS := $(HOST_OUT_EXECUTABLES)/rmtypedefs
 APPEND2SIMG := $(HOST_OUT_EXECUTABLES)/append2simg
@@ -503,13 +537,6 @@ BUILD_VERITY_TREE := $(HOST_OUT_EXECUTABLES)/build_verity_tree
 BOOT_SIGNER := $(HOST_OUT_EXECUTABLES)/boot_signer
 FUTILITY := prebuilts/misc/$(BUILD_OS)-$(HOST_PREBUILT_ARCH)/futility/futility
 VBOOT_SIGNER := prebuilts/misc/scripts/vboot_signer/vboot_signer.sh
-
-# ACP is always for the build OS, not for the host OS
-ACP := $(BUILD_OUT_EXECUTABLES)/acp$(BUILD_EXECUTABLE_SUFFIX)
-
-# dx is java behind a shell script; no .exe necessary.
-DX := $(HOST_OUT_EXECUTABLES)/dx
-ZIPALIGN := $(HOST_OUT_EXECUTABLES)/zipalign$(HOST_EXECUTABLE_SUFFIX)
 
 # relocation packer
 RELOCATION_PACKER := prebuilts/misc/$(BUILD_OS)-$(HOST_PREBUILT_ARCH)/relocation_packer/relocation_packer

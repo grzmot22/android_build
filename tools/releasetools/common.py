@@ -62,6 +62,7 @@ class Options(object):
 
     self.search_path = platform_search_path.get(sys.platform, None)
     self.signapk_path = "framework/signapk.jar"  # Relative to search_path
+    self.signapk_shared_library_path = "lib64"   # Relative to search_path
     self.extra_signapk_args = []
     self.java_path = "java"  # Use the one on the path by default.
     self.java_args = "-Xmx2048m" # JVM Args
@@ -617,37 +618,29 @@ def GetKeyPasswords(keylist):
   return key_passwords
 
 
-def SignFile(input_name, output_name, key, password, align=None,
-             whole_file=False):
+def SignFile(input_name, output_name, key, password, whole_file=False):
   """Sign the input_name zip/jar/apk, producing output_name.  Use the
   given key and password (the latter may be None if the key does not
   have a password.
-
-  If align is an integer > 1, zipalign is run to align stored files in
-  the output zip on 'align'-byte boundaries.
 
   If whole_file is true, use the "-w" option to SignApk to embed a
   signature that covers the whole file in the archive comment of the
   zip file.
   """
 
-  if align == 0 or align == 1:
-    align = None
+  java_library_path = os.path.join(
+      OPTIONS.search_path, OPTIONS.signapk_shared_library_path)
 
-  if align:
-    temp = tempfile.NamedTemporaryFile()
-    sign_name = temp.name
-  else:
-    sign_name = output_name
-
-  cmd = [OPTIONS.java_path, OPTIONS.java_args, "-jar",
+  cmd = [OPTIONS.java_path, OPTIONS.java_args,
+         "-Djava.library.path=" + java_library_path,
+         "-jar",
          os.path.join(OPTIONS.search_path, OPTIONS.signapk_path)]
   cmd.extend(OPTIONS.extra_signapk_args)
   if whole_file:
     cmd.append("-w")
   cmd.extend([key + OPTIONS.public_key_suffix,
               key + OPTIONS.private_key_suffix,
-              input_name, sign_name])
+              input_name, output_name])
 
   p = Run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
   if password is not None:
@@ -655,13 +648,6 @@ def SignFile(input_name, output_name, key, password, align=None,
   p.communicate(password)
   if p.returncode != 0:
     raise ExternalError("signapk.jar failed: return code %s" % (p.returncode,))
-
-  if align:
-    p = Run(["zipalign", "-f", "-p", str(align), sign_name, output_name])
-    p.communicate()
-    if p.returncode != 0:
-      raise ExternalError("zipalign failed: return code %s" % (p.returncode,))
-    temp.close()
 
 
 def CheckSize(data, target, info_dict):
@@ -767,7 +753,8 @@ def ParseOptions(argv,
   try:
     opts, args = getopt.getopt(
         argv, "hvp:s:x:" + extra_opts,
-        ["help", "verbose", "path=", "signapk_path=", "extra_signapk_args=",
+        ["help", "verbose", "path=", "signapk_path=",
+         "signapk_shared_library_path=", "extra_signapk_args=",
          "java_path=", "java_args=", "public_key_suffix=",
          "private_key_suffix=", "boot_signer_path=", "boot_signer_args=",
          "verity_signer_path=", "verity_signer_args=", "device_specific=",
@@ -788,6 +775,8 @@ def ParseOptions(argv,
       OPTIONS.search_path = a
     elif o in ("--signapk_path",):
       OPTIONS.signapk_path = a
+    elif o in ("--signapk_shared_library_path",):
+      OPTIONS.signapk_shared_library_path = a
     elif o in ("--extra_signapk_args",):
       OPTIONS.extra_signapk_args = shlex.split(a)
     elif o in ("--java_path",):
