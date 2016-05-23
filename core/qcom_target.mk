@@ -74,11 +74,11 @@ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
     endif
 
 # HACK: check to see if build uses standard QC HAL paths by checking for CM path structure
-AOSP_VARIANT_MAKEFILE := $(wildcard hardware/qcom/audio/default/Android.mk)
+AOSP_VARIANT_MAKEFILE := $(wildcard hardware/qcom/audio-caf/msm8960/Android.mk)
 ifeq ("$(AOSP_VARIANT_MAKEFILE)","")
-$(call project-set-path,qcom-audio,hardware/qcom/audio)
+$(call project-set-path,qcom-audio,hardware/qcom/audio-caf)
 $(call project-set-path,qcom-display,hardware/qcom/display)
-$(call project-set-path,qcom-media,hardware/qcom/media)
+$(call project-set-path,qcom-media,hardware/qcom/media-caf)
 $(call set-device-specific-path,CAMERA,camera,hardware/qcom/camera)
 $(call set-device-specific-path,GPS,gps,hardware/qcom/gps)
 $(call set-device-specific-path,SENSORS,sensors,hardware/qcom/sensors)
@@ -111,9 +111,9 @@ endif # AOSP_VARIANT_MAKEFILE
 
 else
 
-$(call project-set-path,qcom-audio,hardware/qcom/audio/default)
+$(call project-set-path,qcom-audio,hardware/qcom/audio-caf)
 $(call project-set-path,qcom-display,hardware/qcom/display/$(TARGET_BOARD_PLATFORM))
-$(call project-set-path,qcom-media,hardware/qcom/media/default)
+$(call project-set-path,qcom-media,hardware/qcom/media-caf)
 
 $(call project-set-path,qcom-camera,hardware/qcom/camera)
 $(call project-set-path,qcom-gps,hardware/qcom/gps)
