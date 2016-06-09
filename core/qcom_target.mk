@@ -84,7 +84,7 @@ $(call set-device-specific-path,GPS,gps,hardware/qcom/gps)
 $(call set-device-specific-path,SENSORS,sensors,hardware/qcom/sensors)
 $(call set-device-specific-path,LOC_API,loc-api,vendor/qcom/opensource/location)
 $(call set-device-specific-path,DATASERVICES,dataservices,vendor/qcom/opensource/dataservices)
-$(call project-set-path,ril,hardware/ril)
+$(call project-set-path,ril,hardware/ril-caf)
 $(call project-set-path,wlan,hardware/qcom/wlan)
 $(call project-set-path,bt-vendor,hardware/qcom/bt)
 else
